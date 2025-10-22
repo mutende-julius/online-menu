@@ -2,6 +2,11 @@
 async function processRealMpesaPayment(phoneNumber, amount, orderId) {
     try {
         const confirmBtn = document.getElementById('confirmMpesa');
+        if (!confirmBtn) {
+            console.error('Confirm M-Pesa button not found');
+            return;
+        }
+        
         const originalText = confirmBtn.innerHTML;
         
         // Show processing state
@@ -46,15 +51,27 @@ async function processRealMpesaPayment(phoneNumber, amount, orderId) {
         alert('Network error. Please check your connection and try again.');
         
         const confirmBtn = document.getElementById('confirmMpesa');
-        confirmBtn.innerHTML = '📱 Pay with M-Pesa';
-        confirmBtn.disabled = false;
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '📱 Pay with M-Pesa';
+            confirmBtn.disabled = false;
+        }
     }
 }
 
 function showMpesaInstructions(phoneNumber, amount, checkoutRequestID) {
     const paymentModal = document.getElementById('paymentModal');
+    if (!paymentModal) {
+        console.error('Payment modal not found');
+        return;
+    }
     
-    paymentModal.querySelector('.modal-body').innerHTML = `
+    const modalBody = paymentModal.querySelector('.modal-body');
+    if (!modalBody) {
+        console.error('Modal body not found');
+        return;
+    }
+    
+    modalBody.innerHTML = `
         <div class="mpesa-instructions">
             <div class="instruction-icon">📱</div>
             <h3>Check Your Phone</h3>
@@ -91,15 +108,21 @@ function showMpesaInstructions(phoneNumber, amount, checkoutRequestID) {
         </div>
     `;
 
-    // Add event listeners
-    document.getElementById('checkPaymentStatus').addEventListener('click', () => {
-        checkMpesaPaymentStatus(checkoutRequestID);
-    });
+    // Add event listeners with null checks
+    const checkStatusBtn = document.getElementById('checkPaymentStatus');
+    if (checkStatusBtn) {
+        checkStatusBtn.addEventListener('click', () => {
+            checkMpesaPaymentStatus(checkoutRequestID);
+        });
+    }
     
-    document.getElementById('cancelPayment').addEventListener('click', () => {
-        paymentModal.querySelector('.modal-body').innerHTML = getOriginalPaymentForm();
-        setupPaymentEventListeners();
-    });
+    const cancelBtn = document.getElementById('cancelPayment');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+            // Reset to original payment form
+            setupPaymentModal();
+        });
+    }
 
     // Start polling for payment status
     startPaymentPolling(checkoutRequestID);
@@ -152,45 +175,77 @@ async function checkMpesaPaymentStatus(checkoutRequestID) {
 
 function showPaymentSuccess(paymentResult) {
     const paymentModal = document.getElementById('paymentModal');
+    if (!paymentModal) return;
     
-    paymentModal.querySelector('.modal-body').innerHTML = `
+    const modalBody = paymentModal.querySelector('.modal-body');
+    if (!modalBody) return;
+    
+    modalBody.innerHTML = `
         <div class="payment-success">
             <div class="success-icon">✅</div>
             <h3>Payment Successful!</h3>
             <div class="success-details">
-                <p><strong>Amount:</strong> Ksh ${paymentResult.Amount}</p>
-                <p><strong>Receipt:</strong> ${paymentResult.MpesaReceiptNumber}</p>
-                <p><strong>Phone:</strong> ${paymentResult.PhoneNumber}</p>
-                <p><strong>Time:</strong> ${paymentResult.TransactionDate}</p>
+                <p><strong>Amount:</strong> Ksh ${paymentResult.Amount || 'N/A'}</p>
+                <p><strong>Receipt:</strong> ${paymentResult.MpesaReceiptNumber || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${paymentResult.PhoneNumber || 'N/A'}</p>
+                <p><strong>Time:</strong> ${paymentResult.TransactionDate || 'N/A'}</p>
             </div>
             <button id="completeOrder" class="confirm-btn">Complete Order</button>
         </div>
     `;
     
-    document.getElementById('completeOrder').addEventListener('click', () => {
-        paymentModal.style.display = 'none';
-        if (typeof menu !== 'undefined' && menu.processPaymentSuccess) {
-            menu.processPaymentSuccess();
-        }
-    });
+    const completeBtn = document.getElementById('completeOrder');
+    if (completeBtn) {
+        completeBtn.addEventListener('click', () => {
+            paymentModal.style.display = 'none';
+            // Check if menu object exists before calling
+            if (typeof window.DigitalMenu !== 'undefined' && window.DigitalMenu.processPaymentSuccess) {
+                window.DigitalMenu.processPaymentSuccess();
+            }
+        });
+    }
 }
 
-// Update the main M-Pesa payment handler
-document.getElementById('confirmMpesa').addEventListener('click', function() {
-    const phoneNumber = document.getElementById('phoneNumber').value;
+// Setup payment modal with proper event listeners
+function setupPaymentModal() {
+    const confirmMpesaBtn = document.getElementById('confirmMpesa');
+    const phoneInput = document.getElementById('phoneNumber');
+    
+    if (confirmMpesaBtn) {
+        // Remove existing listeners and add new one
+        confirmMpesaBtn.replaceWith(confirmMpesaBtn.cloneNode(true));
+        document.getElementById('confirmMpesa').addEventListener('click', handleMpesaPayment);
+    }
+}
+
+// Main M-Pesa payment handler
+function handleMpesaPayment() {
+    const phoneInput = document.getElementById('phoneNumber');
+    if (!phoneInput) {
+        console.error('Phone number input not found');
+        return;
+    }
+    
+    const phoneNumber = phoneInput.value;
     
     if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
         alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
         return;
     }
 
-    const amount = parseInt(document.getElementById('paymentTotal').textContent.replace(/,/g, ''));
+    const paymentTotalEl = document.getElementById('paymentTotal');
+    if (!paymentTotalEl) {
+        console.error('Payment total element not found');
+        return;
+    }
+    
+    const amount = parseInt(paymentTotalEl.textContent.replace(/,/g, '')) || 0;
     const orderId = 'ORD' + Date.now().toString().slice(-8);
     
     // Store order temporarily before payment
     const orderData = {
-        tableNumber: menu.currentTable,
-        items: menu.cart,
+        tableNumber: window.DigitalMenu?.currentTable || 1,
+        items: window.DigitalMenu?.cart || [],
         total: amount,
         payment_method: 'mpesa',
         order_id: orderId
@@ -198,4 +253,18 @@ document.getElementById('confirmMpesa').addEventListener('click', function() {
     
     // Process real M-Pesa payment
     processRealMpesaPayment(phoneNumber, amount, orderId);
+}
+
+// Initialize payment system when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Payment system initializing...');
+    
+    // Wait a bit for other scripts to load
+    setTimeout(() => {
+        setupPaymentModal();
+        console.log('Payment buttons initialized');
+    }, 100);
 });
+
+// Fallback for manual initialization
+window.initializePaymentSystem = setupPaymentModal;

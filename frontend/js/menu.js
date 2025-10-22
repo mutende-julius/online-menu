@@ -1,74 +1,154 @@
-class DigitalMenu {
+// Use window object to avoid conflicts
+window.DigitalMenu = window.DigitalMenu || class {
     constructor() {
         this.menuItems = [];
         this.cart = [];
         this.currentTable = null;
-        this.init();
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.init());
+        } else {
+            this.init();
+        }
     }
 
     async init() {
-        await this.loadMenuItems();
-        this.setupEventListeners();
-        this.renderMenu();
+        console.log('Initializing Digital Menu...');
+        try {
+            await this.loadMenuItems();
+            this.setupEventListeners();
+            this.renderMenu();
+            console.log('Digital Menu initialized successfully');
+        } catch (error) {
+            console.error('Error initializing menu:', error);
+        }
     }
 
     async loadMenuItems() {
         try {
             const response = await fetch('data/menu.json');
+            if (!response.ok) throw new Error('Failed to load menu.json');
+            
             const data = await response.json();
-            this.menuItems = data.items;
+            this.menuItems = data.items || [];
+            console.log('Menu items loaded:', this.menuItems.length);
         } catch (error) {
             console.error('Error loading menu:', error);
             // Fallback demo data
             this.menuItems = [
                 {
                     id: 1,
-                    name: "Demo Item",
-                    description: "This is a sample menu item",
-                    price: 500,
-                    category: "main",
-                    image: "breakfast.jpg"
+                    name: "Kenyan Full Breakfast",
+                    description: "Eggs, sausage, bacon, toast, coffee & juice",
+                    price: 750,
+                    category: "breakfast",
+                    image: "breakfast.jpg",
+                    popular: true
+                },
+                {
+                    id: 2,
+                    name: "Nyama Choma",
+                    description: "Grilled meat served with ugali and kachumbari",
+                    price: 1200,
+                    category: "nyama",
+                    image: "nyama-choma.jpg",
+                    popular: true
+                },
+                {
+                    id: 3,
+                    name: "Fresh Juice",
+                    description: "Seasonal fresh fruit juice",
+                    price: 300,
+                    category: "drinks",
+                    image: "juice.jpg"
                 }
             ];
         }
     }
 
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Table number input
-        document.getElementById('tableInput').addEventListener('input', (e) => {
-            this.currentTable = e.target.value ? parseInt(e.target.value) : null;
-            this.updateCheckoutButton();
-        });
+        const tableInput = document.getElementById('tableInput');
+        if (tableInput) {
+            tableInput.addEventListener('input', (e) => {
+                this.currentTable = e.target.value ? parseInt(e.target.value) : null;
+                this.updateCheckoutButton();
+            });
+        }
 
         // Category filters
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.renderMenu(e.target.dataset.category);
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        if (categoryButtons.length > 0) {
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    this.renderMenu(e.target.dataset.category);
+                });
             });
-        });
+        }
 
         // Checkout button
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
-            this.openPaymentModal();
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', () => {
+                this.openPaymentModal();
+            });
+        }
+
+        // Modal close buttons
+        const closeButtons = document.querySelectorAll('.close, #closeSuccess');
+        closeButtons.forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    const modals = document.querySelectorAll('.modal');
+                    modals.forEach(modal => {
+                        if (modal) modal.style.display = 'none';
+                    });
+                });
+            }
+        });
+
+        // Close modal when clicking outside
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
         });
     }
 
     renderMenu(category = 'all') {
         const menuContainer = document.getElementById('menuItems');
+        if (!menuContainer) {
+            console.error('Menu container not found');
+            return;
+        }
+
         const filteredItems = category === 'all' 
             ? this.menuItems 
             : this.menuItems.filter(item => item.category === category);
 
+        if (filteredItems.length === 0) {
+            menuContainer.innerHTML = '<div class="no-items">No items found in this category</div>';
+            return;
+        }
+
         menuContainer.innerHTML = filteredItems.map(item => {
-            // Use absolute path to images folder
+            // Use relative path to images folder
             const imagePath = `images/${item.image}`;
             
             return `
             <div class="menu-item" data-category="${item.category}">
                 <img src="${imagePath}" alt="${item.name}" class="item-image" 
-                     onerror="console.log('Image failed to load: ${imagePath}')">
+                     onerror="this.style.display='none'; console.log('Image not found: ${imagePath}')">
                 <div class="item-info">
                     <div class="item-name">
                         ${item.name}
@@ -78,9 +158,9 @@ class DigitalMenu {
                     <div class="item-price">Ksh ${item.price.toLocaleString()}</div>
                 </div>
                 <div class="item-actions">
-                    <button class="quantity-btn" onclick="menu.decreaseQuantity(${item.id})">-</button>
+                    <button class="quantity-btn" onclick="window.menuInstance.decreaseQuantity(${item.id})">-</button>
                     <span class="quantity-display" id="qty-${item.id}">0</span>
-                    <button class="quantity-btn" onclick="menu.increaseQuantity(${item.id})">+</button>
+                    <button class="quantity-btn" onclick="window.menuInstance.increaseQuantity(${item.id})">+</button>
                 </div>
             </div>
             `;
@@ -89,6 +169,11 @@ class DigitalMenu {
 
     increaseQuantity(itemId) {
         const item = this.menuItems.find(i => i.id === itemId);
+        if (!item) {
+            console.error('Item not found:', itemId);
+            return;
+        }
+
         const cartItem = this.cart.find(i => i.id === itemId);
 
         if (cartItem) {
@@ -116,6 +201,11 @@ class DigitalMenu {
     updateCartDisplay() {
         const cartContainer = document.getElementById('cartItems');
         const totalAmount = document.getElementById('totalAmount');
+
+        if (!cartContainer || !totalAmount) {
+            console.error('Cart elements not found');
+            return;
+        }
 
         // Update quantity displays on menu items
         this.menuItems.forEach(item => {
@@ -153,11 +243,13 @@ class DigitalMenu {
 
     updateCheckoutButton() {
         const checkoutBtn = document.getElementById('checkoutBtn');
+        if (!checkoutBtn) return;
+        
         const isEnabled = this.currentTable && this.cart.length > 0;
         
         checkoutBtn.disabled = !isEnabled;
         checkoutBtn.textContent = isEnabled 
-            ? `Pay Ksh ${document.getElementById('totalAmount').textContent} - Table ${this.currentTable}`
+            ? `Pay Ksh ${document.getElementById('totalAmount')?.textContent || '0'} - Table ${this.currentTable}`
             : 'Proceed to Payment';
     }
 
@@ -169,10 +261,10 @@ class DigitalMenu {
 
         // Show payment modal
         const paymentModal = document.getElementById('paymentModal');
-        paymentModal.style.display = 'block';
-
-        // Update payment summary
-        this.updatePaymentSummary();
+        if (paymentModal) {
+            paymentModal.style.display = 'block';
+            this.updatePaymentSummary();
+        }
     }
 
     updatePaymentSummary() {
@@ -180,6 +272,8 @@ class DigitalMenu {
         const paymentTotal = document.getElementById('paymentTotal');
         const mpesaAmount = document.getElementById('mpesaAmount');
         const cardAmount = document.getElementById('cardAmount');
+
+        if (!paymentSummary || !paymentTotal) return;
 
         const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         
@@ -191,14 +285,14 @@ class DigitalMenu {
         `).join('');
 
         paymentTotal.textContent = total.toLocaleString();
-        mpesaAmount.textContent = total.toLocaleString();
-        cardAmount.textContent = total.toLocaleString();
+        if (mpesaAmount) mpesaAmount.textContent = total.toLocaleString();
+        if (cardAmount) cardAmount.textContent = total.toLocaleString();
     }
 
     processPaymentSuccess() {
         const orderData = {
             tableNumber: this.currentTable,
-            items: this.cart,
+            items: [...this.cart], // Copy array
             total: this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             timestamp: new Date().toISOString(),
             orderId: 'ORD' + Date.now().toString().slice(-6)
@@ -207,14 +301,22 @@ class DigitalMenu {
         console.log('Processing payment success:', orderData);
 
         // Show success modal
-        document.getElementById('paymentModal').style.display = 'none';
+        const paymentModal = document.getElementById('paymentModal');
         const successModal = document.getElementById('successModal');
         
-        document.getElementById('successTable').textContent = orderData.tableNumber;
-        document.getElementById('successAmount').textContent = orderData.total.toLocaleString();
-        document.getElementById('orderId').textContent = orderData.orderId;
+        if (paymentModal) paymentModal.style.display = 'none';
         
-        successModal.style.display = 'block';
+        if (successModal) {
+            const successTable = document.getElementById('successTable');
+            const successAmount = document.getElementById('successAmount');
+            const orderId = document.getElementById('orderId');
+            
+            if (successTable) successTable.textContent = orderData.tableNumber;
+            if (successAmount) successAmount.textContent = orderData.total.toLocaleString();
+            if (orderId) orderId.textContent = orderData.orderId;
+            
+            successModal.style.display = 'block';
+        }
 
         // Reset cart after successful payment
         this.cart = [];
@@ -227,7 +329,7 @@ class DigitalMenu {
     completeOrder() {
         const orderData = {
             tableNumber: this.currentTable,
-            items: this.cart,
+            items: [...this.cart],
             total: this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
             timestamp: new Date().toISOString(),
             orderId: 'ORD' + Date.now().toString().slice(-6)
@@ -241,21 +343,61 @@ class DigitalMenu {
         this.updateCartDisplay();
         
         // Close payment modal if open
-        document.getElementById('paymentModal').style.display = 'none';
+        const paymentModal = document.getElementById('paymentModal');
+        if (paymentModal) paymentModal.style.display = 'none';
         
         console.log('Order completed:', orderData);
     }
-}
+};
 
 // Initialize the menu when page loads
-const menu = new DigitalMenu();
+let menuInstance = null;
 
-// Make menu globally available for button clicks
-window.menu = menu;
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing menu...');
+    
+    try {
+        menuInstance = new window.DigitalMenu();
+        window.menuInstance = menuInstance; // Make available globally
+        
+        // Setup payment buttons with null checks
+        setTimeout(() => {
+            const confirmMpesaBtn = document.getElementById('confirmMpesa');
+            const confirmCardBtn = document.getElementById('confirmCard');
+            const closeSuccessBtn = document.getElementById('closeSuccess');
+            
+            if (confirmMpesaBtn) {
+                confirmMpesaBtn.addEventListener('click', window.processMpesaPayment);
+            }
+            
+            if (confirmCardBtn) {
+                confirmCardBtn.addEventListener('click', window.processCardPayment);
+            }
+            
+            if (closeSuccessBtn) {
+                closeSuccessBtn.addEventListener('click', () => {
+                    const successModal = document.getElementById('successModal');
+                    if (successModal) successModal.style.display = 'none';
+                });
+            }
+            
+            console.log('All event listeners initialized');
+        }, 500);
+        
+    } catch (error) {
+        console.error('Failed to initialize menu:', error);
+    }
+});
 
-// Backup global functions for payment processing
+// Global payment functions with null checks
 window.processMpesaPayment = function() {
-    const phoneNumber = document.getElementById('phoneNumber').value;
+    const phoneInput = document.getElementById('phoneNumber');
+    if (!phoneInput) {
+        console.error('Phone number input not found');
+        return;
+    }
+    
+    const phoneNumber = phoneInput.value;
     
     if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
         alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
@@ -266,6 +408,8 @@ window.processMpesaPayment = function() {
     
     // Show processing state
     const confirmBtn = document.getElementById('confirmMpesa');
+    if (!confirmBtn) return;
+    
     const originalText = confirmBtn.innerHTML;
     confirmBtn.innerHTML = '⏳ Processing M-Pesa...';
     confirmBtn.disabled = true;
@@ -275,25 +419,30 @@ window.processMpesaPayment = function() {
         confirmBtn.innerHTML = '✅ Payment Successful!';
         
         setTimeout(() => {
-            if (menu && menu.processPaymentSuccess) {
-                menu.processPaymentSuccess();
-            } else {
-                menu.completeOrder();
+            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            } else if (window.menuInstance) {
+                window.menuInstance.completeOrder();
             }
             
             confirmBtn.innerHTML = originalText;
             confirmBtn.disabled = false;
-            document.getElementById('phoneNumber').value = '';
+            if (phoneInput) phoneInput.value = '';
         }, 1500);
     }, 3000);
 };
 
 window.processCardPayment = function() {
-    const cardNumber = document.getElementById('cardNumber').value;
-    const expiryDate = document.getElementById('expiryDate').value;
-    const cvv = document.getElementById('cvv').value;
+    const cardNumber = document.getElementById('cardNumber');
+    const expiryDate = document.getElementById('expiryDate');
+    const cvv = document.getElementById('cvv');
     
     if (!cardNumber || !expiryDate || !cvv) {
+        console.error('Card input elements not found');
+        return;
+    }
+    
+    if (!cardNumber.value || !expiryDate.value || !cvv.value) {
         alert('Please fill in all card details');
         return;
     }
@@ -302,6 +451,8 @@ window.processCardPayment = function() {
     
     // Show processing state
     const confirmBtn = document.getElementById('confirmCard');
+    if (!confirmBtn) return;
+    
     const originalText = confirmBtn.innerHTML;
     confirmBtn.innerHTML = '⏳ Processing Card...';
     confirmBtn.disabled = true;
@@ -311,36 +462,25 @@ window.processCardPayment = function() {
         confirmBtn.innerHTML = '✅ Payment Successful!';
         
         setTimeout(() => {
-            if (menu && menu.processPaymentSuccess) {
-                menu.processPaymentSuccess();
-            } else {
-                menu.completeOrder();
+            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            } else if (window.menuInstance) {
+                window.menuInstance.completeOrder();
             }
             
             confirmBtn.innerHTML = originalText;
             confirmBtn.disabled = false;
-            document.getElementById('cardNumber').value = '';
-            document.getElementById('expiryDate').value = '';
-            document.getElementById('cvv').value = '';
+            cardNumber.value = '';
+            expiryDate.value = '';
+            cvv.value = '';
         }, 1500);
     }, 3000);
 };
 
-// Emergency fallback - direct button handlers
-document.addEventListener('DOMContentLoaded', function() {
-    // Wait a bit for the page to fully load
-    setTimeout(() => {
-        const confirmMpesaBtn = document.getElementById('confirmMpesa');
-        const confirmCardBtn = document.getElementById('confirmCard');
-        
-        if (confirmMpesaBtn) {
-            confirmMpesaBtn.addEventListener('click', window.processMpesaPayment);
-        }
-        
-        if (confirmCardBtn) {
-            confirmCardBtn.addEventListener('click', window.processCardPayment);
-        }
-        
-        console.log('Payment buttons initialized');
-    }, 1000);
-});
+// Fallback initialization for manual calls
+window.initializeMenu = function() {
+    if (!window.menuInstance) {
+        window.menuInstance = new window.DigitalMenu();
+    }
+    return window.menuInstance;
+};
