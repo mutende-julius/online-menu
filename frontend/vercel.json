@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "name": "digital-menu-system",
+  "builds": [
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/waiter-dashboard",
+      "dest": "/waiter-dashboard.html"
+    },
+    {
+      "src": "/admin-dashboard", 
+      "dest": "/admin-dashboard.html"
+    },
+    {
+      "src": "/admin-setup",
+      "dest": "/admin-setup.html"
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico))",
+      "dest": "/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
