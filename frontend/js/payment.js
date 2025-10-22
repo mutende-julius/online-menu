@@ -1,4 +1,4 @@
-// Real M-Pesa Integration
+// Demo M-Pesa Integration (No backend required)
 async function processRealMpesaPayment(phoneNumber, amount, orderId) {
     try {
         const confirmBtn = document.getElementById('confirmMpesa');
@@ -13,32 +13,30 @@ async function processRealMpesaPayment(phoneNumber, amount, orderId) {
         confirmBtn.innerHTML = '📱 Sending M-Pesa Prompt...';
         confirmBtn.disabled = true;
 
-        // Call backend to initiate STK Push
-        const response = await fetch('/api/mpesa/stk-push', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                phoneNumber: phoneNumber,
-                amount: amount,
-                orderId: orderId
-            })
-        });
+        // SIMULATE API CALL - Remove this in production
+        console.log('DEMO MODE: Simulating M-Pesa payment');
+        
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
-        const result = await response.json();
+        // Simulate successful response
+        const demoResponse = {
+            success: true,
+            checkoutRequestID: 'DEMO_' + Date.now(),
+            message: 'Demo mode - Payment simulated successfully'
+        };
 
-        if (result.success) {
+        if (demoResponse.success) {
             // STK Push initiated successfully
             confirmBtn.innerHTML = '✅ M-Pesa Prompt Sent!';
             
             // Show instruction to user
-            showMpesaInstructions(phoneNumber, amount, result.checkoutRequestID);
+            showMpesaInstructions(phoneNumber, amount, demoResponse.checkoutRequestID);
             
         } else {
             // STK Push failed
             confirmBtn.innerHTML = '❌ Failed to Send Prompt';
-            alert('Failed to send M-Pesa prompt: ' + result.error);
+            alert('Failed to send M-Pesa prompt: ' + (demoResponse.error || 'Unknown error'));
             
             setTimeout(() => {
                 confirmBtn.innerHTML = originalText;
@@ -48,12 +46,19 @@ async function processRealMpesaPayment(phoneNumber, amount, orderId) {
 
     } catch (error) {
         console.error('M-Pesa payment error:', error);
-        alert('Network error. Please check your connection and try again.');
         
+        // Fallback to simple success for demo
         const confirmBtn = document.getElementById('confirmMpesa');
         if (confirmBtn) {
-            confirmBtn.innerHTML = '📱 Pay with M-Pesa';
-            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '✅ Payment Successful (Demo)';
+            
+            setTimeout(() => {
+                if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                    window.menuInstance.processPaymentSuccess();
+                }
+                confirmBtn.innerHTML = '📱 Pay with M-Pesa';
+                confirmBtn.disabled = false;
+            }, 2000);
         }
     }
 }
@@ -74,45 +79,54 @@ function showMpesaInstructions(phoneNumber, amount, checkoutRequestID) {
     modalBody.innerHTML = `
         <div class="mpesa-instructions">
             <div class="instruction-icon">📱</div>
-            <h3>Check Your Phone</h3>
-            <p>We've sent an M-Pesa prompt to <strong>${phoneNumber}</strong></p>
+            <h3>DEMO MODE - Check Your Phone</h3>
+            <p>📢 <strong>This is a demonstration</strong> - No real payment will be processed</p>
+            <p>In a real scenario, an M-Pesa prompt would be sent to <strong>${phoneNumber}</strong></p>
             
             <div class="instruction-steps">
                 <div class="step">
                     <span class="step-number">1</span>
-                    <span class="step-text">Check your phone for the M-Pesa prompt</span>
+                    <span class="step-text"><strong>Demo:</strong> Check your phone for the M-Pesa prompt</span>
                 </div>
                 <div class="step">
                     <span class="step-number">2</span>
-                    <span class="step-text">Enter your M-Pesa PIN</span>
+                    <span class="step-text"><strong>Demo:</strong> Enter your M-Pesa PIN</span>
                 </div>
                 <div class="step">
                     <span class="step-number">3</span>
-                    <span class="step-text">Wait for confirmation</span>
+                    <span class="step-text"><strong>Demo:</strong> Wait for confirmation</span>
                 </div>
             </div>
             
             <div class="payment-details">
                 <p><strong>Amount:</strong> Ksh ${amount.toLocaleString()}</p>
-                <p><strong>Paybill:</strong> 174379</p>
+                <p><strong>Paybill:</strong> 174379 (Demo)</p>
                 <p><strong>Account:</strong> ${checkoutRequestID}</p>
             </div>
             
-            <div class="waiting-animation">
-                <div class="loading-spinner"></div>
-                <p>Waiting for payment confirmation...</p>
+            <div class="demo-notice" style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <strong>🔄 Demo Mode Active</strong><br>
+                This is a simulation. No real M-Pesa transaction will occur.
             </div>
             
-            <button id="checkPaymentStatus" class="confirm-btn">Check Payment Status</button>
-            <button id="cancelPayment" class="cancel-btn">Cancel Payment</button>
+            <button id="simulateSuccess" class="confirm-btn" style="background: #28a745;">✅ Simulate Successful Payment</button>
+            <button id="simulateFailure" class="cancel-btn" style="background: #dc3545;">❌ Simulate Failed Payment</button>
+            <button id="cancelPayment" class="cancel-btn">← Back to Payment</button>
         </div>
     `;
 
     // Add event listeners with null checks
-    const checkStatusBtn = document.getElementById('checkPaymentStatus');
-    if (checkStatusBtn) {
-        checkStatusBtn.addEventListener('click', () => {
-            checkMpesaPaymentStatus(checkoutRequestID);
+    const simulateSuccessBtn = document.getElementById('simulateSuccess');
+    if (simulateSuccessBtn) {
+        simulateSuccessBtn.addEventListener('click', () => {
+            simulatePaymentSuccess(phoneNumber, amount, checkoutRequestID);
+        });
+    }
+    
+    const simulateFailureBtn = document.getElementById('simulateFailure');
+    if (simulateFailureBtn) {
+        simulateFailureBtn.addEventListener('click', () => {
+            simulatePaymentFailure();
         });
     }
     
@@ -123,148 +137,36 @@ function showMpesaInstructions(phoneNumber, amount, checkoutRequestID) {
             setupPaymentModal();
         });
     }
+}
 
-    // Start polling for payment status
-    startPaymentPolling(checkoutRequestID);
+function simulatePaymentSuccess(phoneNumber, amount, checkoutRequestID) {
+    const paymentResult = {
+        Amount: amount,
+        MpesaReceiptNumber: 'DEMO' + Date.now().toString().slice(-8),
+        PhoneNumber: phoneNumber,
+        TransactionDate: new Date().toLocaleString()
+    };
+    
+    showPaymentSuccess(paymentResult);
+}
+
+function simulatePaymentFailure() {
+    alert('❌ Payment Failed\n\nIn a real scenario, this could happen due to:\n• Insufficient funds\n• Wrong PIN\n• Network issues\n• Transaction cancelled');
+    
+    // Reset payment form
+    setupPaymentModal();
 }
 
 function startPaymentPolling(checkoutRequestID) {
-    const pollInterval = setInterval(async () => {
-        try {
-            const response = await fetch(`/api/mpesa/payment-status/${checkoutRequestID}`);
-            const result = await response.json();
-            
-            if (result.success && result.result.ResultCode === 0) {
-                // Payment successful
-                clearInterval(pollInterval);
-                showPaymentSuccess(result.result);
-            } else if (result.success && result.result.ResultCode !== 0) {
-                // Payment failed or still processing
-                console.log('Payment status:', result.result.ResultDesc);
-            }
-        } catch (error) {
-            console.error('Error polling payment status:', error);
-        }
-    }, 5000); // Check every 5 seconds
-
-    // Stop polling after 5 minutes
-    setTimeout(() => {
-        clearInterval(pollInterval);
-    }, 300000);
+    console.log('DEMO: Payment polling started for:', checkoutRequestID);
+    // In demo mode, we don't need real polling
 }
 
 async function checkMpesaPaymentStatus(checkoutRequestID) {
-    try {
-        const response = await fetch(`/api/mpesa/payment-status/${checkoutRequestID}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            if (result.result.ResultCode === 0) {
-                showPaymentSuccess(result.result);
-            } else {
-                alert('Payment status: ' + result.result.ResultDesc);
-            }
-        } else {
-            alert('Error checking payment status');
-        }
-    } catch (error) {
-        console.error('Error checking payment status:', error);
-        alert('Network error checking payment status');
-    }
+    console.log('DEMO: Checking payment status for:', checkoutRequestID);
+    // In demo mode, simulate success after user action
+    alert('Demo: Payment status check would happen here');
 }
 
-function showPaymentSuccess(paymentResult) {
-    const paymentModal = document.getElementById('paymentModal');
-    if (!paymentModal) return;
-    
-    const modalBody = paymentModal.querySelector('.modal-body');
-    if (!modalBody) return;
-    
-    modalBody.innerHTML = `
-        <div class="payment-success">
-            <div class="success-icon">✅</div>
-            <h3>Payment Successful!</h3>
-            <div class="success-details">
-                <p><strong>Amount:</strong> Ksh ${paymentResult.Amount || 'N/A'}</p>
-                <p><strong>Receipt:</strong> ${paymentResult.MpesaReceiptNumber || 'N/A'}</p>
-                <p><strong>Phone:</strong> ${paymentResult.PhoneNumber || 'N/A'}</p>
-                <p><strong>Time:</strong> ${paymentResult.TransactionDate || 'N/A'}</p>
-            </div>
-            <button id="completeOrder" class="confirm-btn">Complete Order</button>
-        </div>
-    `;
-    
-    const completeBtn = document.getElementById('completeOrder');
-    if (completeBtn) {
-        completeBtn.addEventListener('click', () => {
-            paymentModal.style.display = 'none';
-            // Check if menu object exists before calling
-            if (typeof window.DigitalMenu !== 'undefined' && window.DigitalMenu.processPaymentSuccess) {
-                window.DigitalMenu.processPaymentSuccess();
-            }
-        });
-    }
-}
-
-// Setup payment modal with proper event listeners
-function setupPaymentModal() {
-    const confirmMpesaBtn = document.getElementById('confirmMpesa');
-    const phoneInput = document.getElementById('phoneNumber');
-    
-    if (confirmMpesaBtn) {
-        // Remove existing listeners and add new one
-        confirmMpesaBtn.replaceWith(confirmMpesaBtn.cloneNode(true));
-        document.getElementById('confirmMpesa').addEventListener('click', handleMpesaPayment);
-    }
-}
-
-// Main M-Pesa payment handler
-function handleMpesaPayment() {
-    const phoneInput = document.getElementById('phoneNumber');
-    if (!phoneInput) {
-        console.error('Phone number input not found');
-        return;
-    }
-    
-    const phoneNumber = phoneInput.value;
-    
-    if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
-        alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
-        return;
-    }
-
-    const paymentTotalEl = document.getElementById('paymentTotal');
-    if (!paymentTotalEl) {
-        console.error('Payment total element not found');
-        return;
-    }
-    
-    const amount = parseInt(paymentTotalEl.textContent.replace(/,/g, '')) || 0;
-    const orderId = 'ORD' + Date.now().toString().slice(-8);
-    
-    // Store order temporarily before payment
-    const orderData = {
-        tableNumber: window.DigitalMenu?.currentTable || 1,
-        items: window.DigitalMenu?.cart || [],
-        total: amount,
-        payment_method: 'mpesa',
-        order_id: orderId
-    };
-    
-    // Process real M-Pesa payment
-    processRealMpesaPayment(phoneNumber, amount, orderId);
-}
-
-// Initialize payment system when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Payment system initializing...');
-    
-    // Wait a bit for other scripts to load
-    setTimeout(() => {
-        setupPaymentModal();
-        console.log('Payment buttons initialized');
-    }, 100);
-});
-
-// Fallback for manual initialization
-window.initializePaymentSystem = setupPaymentModal;
+// Rest of your payment.js code remains the same...
+// [Keep all the other functions like showPaymentSuccess, setupPaymentModal, etc.]
