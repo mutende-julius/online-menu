@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiter Dashboard - Digital Menu</title>
-   <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/menu.css">
-<script src="js/menu.js"></script>
-<script src="js/payment.js"></script>
+    <link rel="stylesheet" href="css/style.css">
     <style>
         .dashboard-container { 
             max-width: 1400px; 
@@ -41,14 +38,23 @@
         
         .order-card.pending { 
             border-left: 5px solid #f39c12; 
+            background: #fffaf0;
         }
         
         .order-card.preparing { 
             border-left: 5px solid #3498db; 
+            background: #f0f8ff;
         }
         
         .order-card.ready { 
             border-left: 5px solid #27ae60; 
+            background: #f0fff4;
+        }
+        
+        .order-card.completed { 
+            border-left: 5px solid #95a5a6; 
+            background: #f8f9fa;
+            opacity: 0.7;
         }
         
         .order-header { 
@@ -78,6 +84,10 @@
             background: #27ae60; 
         }
         
+        .status-completed { 
+            background: #95a5a6; 
+        }
+        
         .order-item { 
             display: flex; 
             justify-content: space-between; 
@@ -92,6 +102,7 @@
             cursor: pointer; 
             font-weight: 500; 
             margin: 5px; 
+            transition: all 0.3s ease;
         }
         
         .preparing-btn { 
@@ -99,9 +110,35 @@
             color: white; 
         }
         
+        .preparing-btn:hover { 
+            background: #2980b9; 
+        }
+        
         .ready-btn { 
             background: #27ae60; 
             color: white; 
+        }
+        
+        .ready-btn:hover { 
+            background: #219a52; 
+        }
+        
+        .complete-btn { 
+            background: #2c5530; 
+            color: white; 
+        }
+        
+        .complete-btn:hover { 
+            background: #1e3a22; 
+        }
+        
+        .demo-btn {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .demo-btn:hover {
+            background: #8e44ad;
         }
         
         .dashboard-controls { 
@@ -167,21 +204,37 @@
             color: #7f8c8d;
             grid-column: 1 / -1;
         }
+        
+        .demo-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
         <div class="dashboard-header">
-            <h1>👨‍🍳 Waiter Dashboard</h1>
-            <p>Manage orders in real-time</p>
+            <h1>👨‍🍳 Waiter Dashboard - DEMO MODE</h1>
+            <p>Manage orders in real-time • <strong>Demo Data Active</strong></p>
             <div style="margin-top: 15px;">
                 <span style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
-                    📱 Connected
+                    📱 Connected (Demo)
                 </span>
                 <span id="orderCount" style="background: #2c5530; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin-left: 10px;">
                     Orders: <span id="ordersCount">0</span>
                 </span>
+                <button class="action-btn demo-btn" onclick="addDemoOrder()" style="margin-left: 10px;">
+                    ➕ Add Demo Order
+                </button>
             </div>
+        </div>
+
+        <div class="demo-notice">
+            <strong>🔄 DEMO MODE ACTIVE</strong> - This dashboard shows sample data. In production, orders would appear automatically when customers place them.
         </div>
 
         <div class="dashboard-controls">
@@ -190,6 +243,7 @@
                 <button class="filter-btn" data-filter="pending">Pending</button>
                 <button class="filter-btn" data-filter="preparing">Preparing</button>
                 <button class="filter-btn" data-filter="ready">Ready</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
             </div>
             <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh</button>
         </div>
@@ -200,17 +254,23 @@
                 <div class="no-orders">
                     <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
                     <h3>No Orders Yet</h3>
-                    <p>Orders will appear here when customers place them.</p>
+                    <p>Click "Add Demo Order" to see how the dashboard works.</p>
+                    <button class="action-btn demo-btn" onclick="addDemoOrder()" style="margin-top: 15px;">
+                        ➕ Add Your First Demo Order
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Sample orders data for demonstration
+        // Demo orders data - stored in localStorage for persistence
+        let demoOrders = JSON.parse(localStorage.getItem('demoOrders')) || [];
+        
+        // Sample orders data for initial demo
         const sampleOrders = [
             {
-                id: 'ORD000001',
+                id: 'ORD' + Date.now().toString().slice(-6),
                 tableNumber: 5,
                 items: [
                     { name: 'Kenyan Full Breakfast', quantity: 1, price: 750 },
@@ -218,10 +278,11 @@
                 ],
                 totalAmount: 1350,
                 status: 'pending',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                customerName: 'John M.'
             },
             {
-                id: 'ORD000002', 
+                id: 'ORD' + (Date.now() + 1).toString().slice(-6),
                 tableNumber: 3,
                 items: [
                     { name: 'Nyama Choma', quantity: 1, price: 1200 },
@@ -229,10 +290,11 @@
                 ],
                 totalAmount: 1400,
                 status: 'preparing',
-                createdAt: new Date().toISOString()
+                createdAt: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+                customerName: 'Sarah W.'
             },
             {
-                id: 'ORD000003',
+                id: 'ORD' + (Date.now() + 2).toString().slice(-6),
                 tableNumber: 8,
                 items: [
                     { name: 'Chicken Burger', quantity: 1, price: 850 },
@@ -240,36 +302,57 @@
                 ],
                 totalAmount: 1150,
                 status: 'ready',
-                createdAt: new Date().toISOString()
+                createdAt: new Date(Date.now() - 600000).toISOString(), // 10 minutes ago
+                customerName: 'Mike K.'
             }
         ];
 
-        function loadOrders() {
+        // Initialize with sample data if empty
+        if (demoOrders.length === 0) {
+            demoOrders = [...sampleOrders];
+            saveOrders();
+        }
+
+        function saveOrders() {
+            localStorage.setItem('demoOrders', JSON.stringify(demoOrders));
+        }
+
+        function loadOrders(filter = 'all') {
             const ordersList = document.getElementById('ordersList');
             const ordersCount = document.getElementById('ordersCount');
             
-            // For demo purposes, we'll use sample data
-            // In real implementation, you would fetch from API
-            const orders = sampleOrders;
+            let filteredOrders = demoOrders;
+            
+            if (filter !== 'all') {
+                filteredOrders = demoOrders.filter(order => order.status === filter);
+            }
 
-            if (orders.length === 0) {
+            if (filteredOrders.length === 0) {
                 ordersList.innerHTML = `
                     <div class="no-orders">
                         <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
-                        <h3>No Orders Yet</h3>
-                        <p>Orders will appear here when customers place them.</p>
+                        <h3>No ${filter === 'all' ? '' : filter} Orders</h3>
+                        <p>${filter === 'all' ? 'Click "Add Demo Order" to get started.' : `No ${filter} orders found.`}</p>
+                        ${filter === 'all' ? `<button class="action-btn demo-btn" onclick="addDemoOrder()" style="margin-top: 15px;">
+                            ➕ Add Demo Order
+                        </button>` : ''}
                     </div>
                 `;
                 ordersCount.textContent = '0';
                 return;
             }
 
-            ordersCount.textContent = orders.length;
+            ordersCount.textContent = filteredOrders.length;
             
-            ordersList.innerHTML = orders.map(order => `
+            ordersList.innerHTML = filteredOrders.map(order => `
                 <div class="order-card ${order.status}">
                     <div class="order-header">
-                        <div class="order-id" style="font-weight: bold; color: #2c5530; font-size: 1.1em;">${order.id}</div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                            <div class="order-id" style="font-weight: bold; color: #2c5530; font-size: 1.1em;">${order.id}</div>
+                            <div style="font-size: 0.9em; color: #7f8c8d; margin-top: 2px;">
+                                ${order.customerName || 'Customer'}
+                            </div>
+                        </div>
                         <div class="order-status status-${order.status}">
                             ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </div>
@@ -282,7 +365,7 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: #7f8c8d; font-weight: 500;">Amount:</span>
-                            <span style="font-weight: bold; color: #2c5530;">Ksh ${order.totalAmount}</span>
+                            <span style="font-weight: bold; color: #2c5530;">Ksh ${order.totalAmount.toLocaleString()}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="color: #7f8c8d; font-weight: 500;">Time:</span>
@@ -296,7 +379,7 @@
                             <div class="order-item">
                                 <span class="item-name">${item.name}</span>
                                 <span style="color: #7f8c8d; margin-left: 10px;">x${item.quantity}</span>
-                                <span style="font-weight: bold; color: #2c5530;">Ksh ${item.price * item.quantity}</span>
+                                <span style="font-weight: bold; color: #2c5530;">Ksh ${(item.price * item.quantity).toLocaleString()}</span>
                             </div>
                         `).join('')}
                     </div>
@@ -313,8 +396,13 @@
                             </button>
                         ` : ''}
                         ${order.status === 'ready' ? `
-                            <button class="action-btn" style="background: #27ae60; color: white;" onclick="completeOrder('${order.id}')">
-                                🎉 Served
+                            <button class="action-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
+                                🎉 Mark Served
+                            </button>
+                        ` : ''}
+                        ${order.status === 'completed' ? `
+                            <button class="action-btn" style="background: #e74c3c; color: white;" onclick="deleteOrder('${order.id}')">
+                                🗑️ Remove
                             </button>
                         ` : ''}
                     </div>
@@ -322,16 +410,81 @@
             `).join('');
         }
 
-        function updateOrderStatus(orderId, newStatus) {
-            alert(`Order ${orderId} status updated to: ${newStatus}`);
-            // In real implementation, you would call API to update status
-            loadOrders(); // Reload to show changes
+        function addDemoOrder() {
+            const tables = [2, 4, 5, 6, 7, 8, 9, 10];
+            const customers = ['John M.', 'Sarah W.', 'Mike K.', 'Lisa P.', 'David R.', 'Emma T.'];
+            const menuItems = [
+                { name: 'Kenyan Breakfast', price: 750 },
+                { name: 'Nyama Choma', price: 1200 },
+                { name: 'Chicken Burger', price: 850 },
+                { name: 'Grilled Tilapia', price: 950 },
+                { name: 'Fresh Juice', price: 300 },
+                { name: 'Coffee', price: 200 },
+                { name: 'Ugali', price: 100 },
+                { name: 'French Fries', price: 300 }
+            ];
+            
+            const randomTable = tables[Math.floor(Math.random() * tables.length)];
+            const randomCustomer = customers[Math.floor(Math.random() * customers.length)];
+            const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
+            
+            const items = [];
+            let totalAmount = 0;
+            
+            for (let i = 0; i < numItems; i++) {
+                const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
+                const quantity = Math.floor(Math.random() * 2) + 1; // 1-2 quantity
+                items.push({
+                    name: randomItem.name,
+                    quantity: quantity,
+                    price: randomItem.price
+                });
+                totalAmount += randomItem.price * quantity;
+            }
+            
+            const newOrder = {
+                id: 'ORD' + Date.now().toString().slice(-6),
+                tableNumber: randomTable,
+                items: items,
+                totalAmount: totalAmount,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                customerName: randomCustomer
+            };
+            
+            demoOrders.unshift(newOrder); // Add to beginning
+            saveOrders();
+            loadOrders();
+            
+            // Show notification
+            alert(`✅ New demo order created!\nTable: ${randomTable}\nCustomer: ${randomCustomer}\nAmount: Ksh ${totalAmount.toLocaleString()}`);
         }
 
-        function completeOrder(orderId) {
-            if (confirm('Mark this order as completed and served?')) {
-                alert(`Order ${orderId} completed!`);
-                // In real implementation, you would call API to complete order
+        function updateOrderStatus(orderId, newStatus) {
+            const order = demoOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveOrders();
+                
+                // Show status update message
+                const statusMessages = {
+                    'preparing': '👨‍🍳 Order is now being prepared',
+                    'ready': '✅ Order is ready for serving',
+                    'completed': '🎉 Order has been served'
+                };
+                
+                if (statusMessages[newStatus]) {
+                    alert(statusMessages[newStatus]);
+                }
+                
+                loadOrders();
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Remove this completed order from the dashboard?')) {
+                demoOrders = demoOrders.filter(order => order.id !== orderId);
+                saveOrders();
                 loadOrders();
             }
         }
@@ -341,16 +494,31 @@
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                // Filter functionality would go here
-                loadOrders(); // Reload with filter
+                const filter = this.dataset.filter;
+                loadOrders(filter);
             });
         });
 
+        // Auto-refresh every 30 seconds (in production this would check for new orders)
+        setInterval(() => {
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            loadOrders(activeFilter);
+        }, 30000);
+
+        // Clear all demo data (for testing)
+        window.clearDemoData = function() {
+            if (confirm('Clear all demo orders? This cannot be undone.')) {
+                demoOrders = [];
+                saveOrders();
+                loadOrders();
+            }
+        };
+
         // Load orders when page loads
-        document.addEventListener('DOMContentLoaded', loadOrders);
-        
-        // Auto-refresh every 30 seconds
-        setInterval(loadOrders, 30000);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+            console.log('Waiter Dashboard loaded in demo mode');
+        });
     </script>
 </body>
 </html>
