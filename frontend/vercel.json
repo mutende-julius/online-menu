@@ -28,6 +28,22 @@
   ],
   "routes": [
     {
+      "src": "/waiter-dashboard",
+      "dest": "/waiter-dashboard.html"
+    },
+    {
+      "src": "/admin-dashboard",
+      "dest": "/admin-dashboard.html"
+    },
+    {
+      "src": "/admin-setup",
+      "dest": "/admin-setup.html"
+    },
+    {
+      "src": "/test-dashboard",
+      "dest": "/test-dashboard.html"
+    },
+    {
       "src": "/css/(.*)",
       "dest": "/css/$1"
     },
