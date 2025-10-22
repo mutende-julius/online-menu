@@ -1,0 +1,75 @@
+{
+    "restaurant": {
+        "name": "Savanna Grill & Bar",
+        "tagline": "Authentic Kenyan Cuisine",
+        "logo": "logo.png"
+    },
+    "categories": [
+        {"id": "breakfast", "name": "Breakfast", "icon": "🥞"},
+        {"id": "main", "name": "Main Dishes", "icon": "🍛"},
+        {"id": "nyama", "name": "Nyama Choma", "icon": "🔥"},
+        {"id": "drinks", "name": "Drinks", "icon": "🍹"}
+    ],
+    "items": [
+        {
+            "id": 1,
+            "name": "Kenyan Full Breakfast",
+            "description": "Eggs, sausage, bacon, baked beans, toast & fresh juice",
+            "price": 750,
+            "category": "breakfast",
+            "image": "breakfast.jpg",
+            "popular": true
+        },
+        {
+            "id": 2,
+            "name": "Mandazi & Chai",
+            "description": "Fresh homemade mandazi with spiced Kenyan tea",
+            "price": 180,
+            "category": "breakfast",
+            "image": "mandazi.jpg"
+        },
+        {
+            "id": 3,
+            "name": "Ugali & Sukuma Wiki",
+            "description": "With your choice of beef, chicken or fish stew",
+            "price": 450,
+            "category": "main",
+            "image": "ugali-sukuma.jpg",
+            "popular": true
+        },
+        {
+            "id": 4,
+            "name": "Nyama Choma Special",
+            "description": "1/2 kg grilled meat served with kachumbari & ugali",
+            "price": 1200,
+            "category": "nyama",
+            "image": "nyama-choma.jpg",
+            "popular": true
+        },
+        {
+            "id": 5,
+            "name": "Grilled Tilapia",
+            "description": "Whole tilapia grilled to perfection with vegetables",
+            "price": 950,
+            "category": "main",
+            "image": "tilapia.jpg"
+        },
+        {
+            "id": 6,
+            "name": "Chicken Biryani",
+            "description": "Aromatic rice with tender chicken and spices",
+            "price": 650,
+            "category": "main",
+            "image": "biryani.jpg"
+        },
+        {
+            "id": 7,
+            "name": "Fresh Fruit Juice",
+            "description": "Orange, passion, mango or pineapple",
+            "price": 220,
+            "category": "drinks",
+            "image": "juice.jpg",
+            "popular": true
+        }
+    ]
+}

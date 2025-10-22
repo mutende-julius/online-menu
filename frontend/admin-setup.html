@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Setup - Digital Menu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .setup-container { max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .setup-steps { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        .step { margin-bottom: 15px; padding: 10px; background: white; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>🏪 Restaurant Client Setup</h1>
+        
+        <div class="setup-steps">
+            <h3>📋 Setup Steps:</h3>
+            <div class="step">1. Get client's M-Pesa Till/PayBill number</div>
+            <div class="step">2. Collect business information</div>
+            <div class="step">3. Configure menu items</div>
+            <div class="step">4. Customize branding</div>
+        </div>
+
+        <form id="clientSetupForm">
+            <div class="form-group">
+                <label>Restaurant Name *</label>
+                <input type="text" id="businessName" required placeholder="e.g., Savanna Grill & Bar">
+            </div>
+
+            <div class="form-group">
+                <label>M-Pesa Till Number *</label>
+                <input type="text" id="shortcode" required placeholder="e.g., 123456">
+            </div>
+
+            <div class="form-group">
+                <label>M-Pesa Passkey *</label>
+                <input type="text" id="passkey" required placeholder="From Safaricom Developer Portal">
+            </div>
+
+            <div class="form-group">
+                <label>Primary Color</label>
+                <input type="color" id="primaryColor" value="#2c5530">
+            </div>
+
+            <div class="form-group">
+                <label>Contact Phone</label>
+                <input type="tel" id="contactPhone" placeholder="Client contact number">
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="contactEmail" placeholder="Client email">
+            </div>
+
+            <button type="submit" class="checkout-btn">💾 Save Client Configuration</button>
+        </form>
+
+        <div id="setupResult" style="display: none; margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px;"></div>
+    </div>
+
+    <script src="js/admin-setup.js"></script>
+</body>
+</html>

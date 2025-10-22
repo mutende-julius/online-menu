@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waiter Dashboard - Digital Menu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        
+        .dashboard-header { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 25px; 
+            text-align: center; 
+            border-left: 5px solid #2c5530; 
+        }
+        
+        .orders-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        .order-card { 
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef; 
+            border-radius: 12px; 
+            padding: 20px; 
+            transition: all 0.3s ease; 
+        }
+        
+        .order-card.pending { 
+            border-left: 5px solid #f39c12; 
+        }
+        
+        .order-card.preparing { 
+            border-left: 5px solid #3498db; 
+        }
+        
+        .order-card.ready { 
+            border-left: 5px solid #27ae60; 
+        }
+        
+        .order-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+        
+        .order-status { 
+            padding: 5px 12px; 
+            border-radius: 15px; 
+            font-size: 0.9em; 
+            font-weight: bold; 
+            color: white; 
+        }
+        
+        .status-pending { 
+            background: #f39c12; 
+        }
+        
+        .status-preparing { 
+            background: #3498db; 
+        }
+        
+        .status-ready { 
+            background: #27ae60; 
+        }
+        
+        .order-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid #ecf0f1; 
+        }
+        
+        .action-btn { 
+            padding: 8px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 500; 
+            margin: 5px; 
+        }
+        
+        .preparing-btn { 
+            background: #3498db; 
+            color: white; 
+        }
+        
+        .ready-btn { 
+            background: #27ae60; 
+            color: white; 
+        }
+        
+        .dashboard-controls { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .filter-buttons { 
+            display: flex; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        
+        .filter-btn { 
+            padding: 10px 20px; 
+            border: 2px solid #e0e0e0; 
+            background: white; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-weight: 500; 
+        }
+        
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #2c5530;
+            color: white;
+            border-color: #2c5530;
+        }
+        
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: #2980b9;
+        }
+        
+        .orders-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            min-height: 400px;
+        }
+        
+        .no-orders {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>👨‍🍳 Waiter Dashboard</h1>
+            <p>Manage orders in real-time</p>
+            <div style="margin-top: 15px;">
+                <span style="background: #3498db; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
+                    📱 Connected
+                </span>
+                <span id="orderCount" style="background: #2c5530; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin-left: 10px;">
+                    Orders: <span id="ordersCount">0</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="dashboard-controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Orders</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="preparing">Preparing</button>
+                <button class="filter-btn" data-filter="ready">Ready</button>
+            </div>
+            <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh</button>
+        </div>
+
+        <div class="orders-container">
+            <div class="orders-grid" id="ordersList">
+                <!-- Orders will be loaded here -->
+                <div class="no-orders">
+                    <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
+                    <h3>No Orders Yet</h3>
+                    <p>Orders will appear here when customers place them.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample orders data for demonstration
+        const sampleOrders = [
+            {
+                id: 'ORD000001',
+                tableNumber: 5,
+                items: [
+                    { name: 'Kenyan Full Breakfast', quantity: 1, price: 750 },
+                    { name: 'Fresh Juice', quantity: 2, price: 300 }
+                ],
+                totalAmount: 1350,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'ORD000002', 
+                tableNumber: 3,
+                items: [
+                    { name: 'Nyama Choma', quantity: 1, price: 1200 },
+                    { name: 'Ugali', quantity: 2, price: 100 }
+                ],
+                totalAmount: 1400,
+                status: 'preparing',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'ORD000003',
+                tableNumber: 8,
+                items: [
+                    { name: 'Chicken Burger', quantity: 1, price: 850 },
+                    { name: 'French Fries', quantity: 1, price: 300 }
+                ],
+                totalAmount: 1150,
+                status: 'ready',
+                createdAt: new Date().toISOString()
+            }
+        ];
+
+        function loadOrders() {
+            const ordersList = document.getElementById('ordersList');
+            const ordersCount = document.getElementById('ordersCount');
+            
+            // For demo purposes, we'll use sample data
+            // In real implementation, you would fetch from API
+            const orders = sampleOrders;
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="no-orders">
+                        <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
+                        <h3>No Orders Yet</h3>
+                        <p>Orders will appear here when customers place them.</p>
+                    </div>
+                `;
+                ordersCount.textContent = '0';
+                return;
+            }
+
+            ordersCount.textContent = orders.length;
+            
+            ordersList.innerHTML = orders.map(order => `
+                <div class="order-card ${order.status}">
+                    <div class="order-header">
+                        <div class="order-id" style="font-weight: bold; color: #2c5530; font-size: 1.1em;">${order.id}</div>
+                        <div class="order-status status-${order.status}">
+                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </div>
+                    </div>
+                    
+                    <div class="order-info">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #7f8c8d; font-weight: 500;">Table:</span>
+                            <span style="font-weight: bold; color: #2c3e50;">${order.tableNumber}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #7f8c8d; font-weight: 500;">Amount:</span>
+                            <span style="font-weight: bold; color: #2c5530;">Ksh ${order.totalAmount}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #7f8c8d; font-weight: 500;">Time:</span>
+                            <span style="font-weight: bold; color: #2c3e50;">${new Date(order.createdAt).toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-items" style="margin-top: 15px;">
+                        <strong style="color: #2c5530;">Items:</strong>
+                        ${order.items.map(item => `
+                            <div class="order-item">
+                                <span class="item-name">${item.name}</span>
+                                <span style="color: #7f8c8d; margin-left: 10px;">x${item.quantity}</span>
+                                <span style="font-weight: bold; color: #2c5530;">Ksh ${item.price * item.quantity}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="order-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${order.status === 'pending' ? `
+                            <button class="action-btn preparing-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
+                                👨‍🍳 Start Preparing
+                            </button>
+                        ` : ''}
+                        ${order.status === 'preparing' ? `
+                            <button class="action-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
+                                ✅ Mark Ready
+                            </button>
+                        ` : ''}
+                        ${order.status === 'ready' ? `
+                            <button class="action-btn" style="background: #27ae60; color: white;" onclick="completeOrder('${order.id}')">
+                                🎉 Served
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            alert(`Order ${orderId} status updated to: ${newStatus}`);
+            // In real implementation, you would call API to update status
+            loadOrders(); // Reload to show changes
+        }
+
+        function completeOrder(orderId) {
+            if (confirm('Mark this order as completed and served?')) {
+                alert(`Order ${orderId} completed!`);
+                // In real implementation, you would call API to complete order
+                loadOrders();
+            }
+        }
+
+        // Filter buttons functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                // Filter functionality would go here
+                loadOrders(); // Reload with filter
+            });
+        });
+
+        // Load orders when page loads
+        document.addEventListener('DOMContentLoaded', loadOrders);
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadOrders, 30000);
+    </script>
+</body>
+</html>

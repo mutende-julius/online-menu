@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savanna Grill & Bar - Digital Menu</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ Savanna Grill & Bar</h1>
+            <p>Order directly from your phone - Hakuna Kusubiri!</p>
+        </header>
+
+        <div class="table-number">
+            <label for="tableInput">Enter Your Table Number:</label>
+            <input type="number" id="tableInput" placeholder="e.g., 5" min="1" max="20">
+        </div>
+
+        <div class="menu-categories">
+            <button class="category-btn active" data-category="all">All Items</button>
+            <button class="category-btn" data-category="breakfast">Breakfast</button>
+            <button class="category-btn" data-category="main">Main Dishes</button>
+            <button class="category-btn" data-category="nyama">Nyama Choma</button>
+            <button class="category-btn" data-category="drinks">Drinks</button>
+        </div>
+
+        <div id="menuItems" class="menu-items">
+            <!-- Menu items will be loaded here by JavaScript -->
+        </div>
+
+        <div class="cart-section">
+            <h3>Your Order 🛒</h3>
+            <div id="cartItems"></div>
+            <div class="cart-total">
+                <strong>Total: Ksh <span id="totalAmount">0</span></strong>
+            </div>
+            <button id="checkoutBtn" class="checkout-btn">Proceed to Payment</button>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💳 Complete Your Payment</h2>
+                <span class="close">&times;</span>
+            </div>
+            
+            <div class="payment-options">
+                <div class="payment-method active" data-method="mpesa">
+                    <div class="method-icon">📱</div>
+                    <div class="method-info">
+                        <div class="method-name">M-Pesa</div>
+                        <div class="method-desc">Pay via M-Pesa</div>
+                    </div>
+                </div>
+                
+                <div class="payment-method" data-method="card">
+                    <div class="method-icon">💳</div>
+                    <div class="method-info">
+                        <div class="method-name">Card Payment</div>
+                        <div class="method-desc">Visa, Mastercard</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- M-Pesa Payment Form -->
+            <div id="mpesaForm" class="payment-form active">
+                <div class="form-group">
+                    <label for="phoneNumber">M-Pesa Phone Number</label>
+                    <input type="tel" id="phoneNumber" placeholder="07XX XXX XXX" maxlength="10">
+                </div>
+                
+                <div class="order-summary">
+                    <h4>Order Summary</h4>
+                    <div id="paymentSummary"></div>
+                    <div class="total-line">
+                        <strong>Total: Ksh <span id="paymentTotal">0</span></strong>
+                    </div>
+                </div>
+
+                <button id="confirmMpesa" class="confirm-btn">
+                    💰 Pay Ksh <span id="mpesaAmount">0</span> via M-Pesa
+                </button>
+            </div>
+
+            <!-- Card Payment Form -->
+            <div id="cardForm" class="payment-form">
+                <div class="form-group">
+                    <label for="cardNumber">Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expiryDate">Expiry Date</label>
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label for="cvv">CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3">
+                    </div>
+                </div>
+
+                <button id="confirmCard" class="confirm-btn">
+                    💳 Pay Ksh <span id="cardAmount">0</span> by Card
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-content">
+            <div class="success-icon">✅</div>
+            <h2>Payment Successful!</h2>
+            <p>Your order has been placed and payment received.</p>
+            <div class="order-details">
+                <p><strong>Table:</strong> <span id="successTable">-</span></p>
+                <p><strong>Amount:</strong> Ksh <span id="successAmount">0</span></p>
+                <p><strong>Order ID:</strong> <span id="orderId">-</span></p>
+            </div>
+            <button id="closeSuccess" class="confirm-btn">Done</button>
+        </div>
+    </div>
+
+    <script src="js/menu.js"></script>
+    <script src="js/payment.js"></script>
+</body>
+</html>
