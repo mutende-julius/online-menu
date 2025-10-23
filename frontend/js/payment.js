@@ -410,9 +410,19 @@ window.processMpesaPayment = function() {
             total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         };
         
-        // Save to both sales database and shared orders
+        // ✅ ADDED: Save to both sales database and shared orders
         recordSale(orderData, 'M-Pesa', phoneNumber);
-        saveOrderToSharedDatabase(orderData);
+        
+        // ✅ ADDED: ALSO save to shared orders for waiter dashboard
+        if (typeof SharedOrders !== 'undefined') {
+            SharedOrders.saveOrder({
+                tableNumber: orderData.tableNumber,
+                items: orderData.items,
+                totalAmount: orderData.total,
+                customerName: `Table ${orderData.tableNumber}`
+            });
+            console.log('✅ ORDER SENT TO WAITER DASHBOARD FROM M-PESA!');
+        }
     }
 
     // Simulate processing
@@ -459,9 +469,19 @@ window.processCardPayment = function() {
             total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         };
         
-        // Save to both sales database and shared orders
+        // ✅ ADDED: Save to both sales database and shared orders
         recordSale(orderData, 'Card');
-        saveOrderToSharedDatabase(orderData);
+        
+        // ✅ ADDED: ALSO save to shared orders for waiter dashboard
+        if (typeof SharedOrders !== 'undefined') {
+            SharedOrders.saveOrder({
+                tableNumber: orderData.tableNumber,
+                items: orderData.items,
+                totalAmount: orderData.total,
+                customerName: `Table ${orderData.tableNumber}`
+            });
+            console.log('✅ ORDER SENT TO WAITER DASHBOARD FROM CARD!');
+        }
     }
 
     // Show processing state

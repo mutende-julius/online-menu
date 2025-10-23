@@ -300,6 +300,19 @@ window.DigitalMenu = window.DigitalMenu || class {
 
         console.log('Processing payment success:', orderData);
 
+        // ✅ ADDED: Save to shared orders for waiter dashboard
+        if (typeof SharedOrders !== 'undefined') {
+            SharedOrders.saveOrder({
+                tableNumber: orderData.tableNumber,
+                items: orderData.items,
+                totalAmount: orderData.total,
+                customerName: `Table ${orderData.tableNumber}`
+            });
+            console.log('✅ ORDER SENT TO WAITER DASHBOARD!');
+        } else {
+            console.log('⚠️ SharedOrders not available, but order completed');
+        }
+
         // Show success modal
         const paymentModal = document.getElementById('paymentModal');
         const successModal = document.getElementById('successModal');
@@ -334,6 +347,17 @@ window.DigitalMenu = window.DigitalMenu || class {
             timestamp: new Date().toISOString(),
             orderId: 'ORD' + Date.now().toString().slice(-6)
         };
+
+        // ✅ ADDED: Save to shared orders for waiter dashboard
+        if (typeof SharedOrders !== 'undefined') {
+            SharedOrders.saveOrder({
+                tableNumber: orderData.tableNumber,
+                items: orderData.items,
+                totalAmount: orderData.total,
+                customerName: `Table ${orderData.tableNumber}`
+            });
+            console.log('✅ ORDER SENT TO WAITER DASHBOARD!');
+        }
 
         // Show success message
         alert(`Order placed successfully!\nTable: ${orderData.tableNumber}\nTotal: Ksh ${orderData.total.toLocaleString()}\nOrder ID: ${orderData.orderId}`);
