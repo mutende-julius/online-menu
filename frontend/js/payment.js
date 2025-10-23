@@ -23,6 +23,23 @@ function recordSale(orderData, paymentMethod, customerPhone = null) {
     return saleData;
 }
 
+// Save order to shared database when payment is successful
+function saveOrderToSharedDatabase(orderData) {
+    if (typeof SharedOrders !== 'undefined') {
+        const sharedOrder = SharedOrders.saveOrder({
+            tableNumber: orderData.tableNumber,
+            items: orderData.items,
+            totalAmount: orderData.total,
+            customerName: `Table ${orderData.tableNumber}`
+        });
+        console.log('Order saved to shared database:', sharedOrder);
+        return sharedOrder;
+    } else {
+        console.error('SharedOrders database not available');
+        return null;
+    }
+}
+
 // Demo M-Pesa Integration (No backend required)
 async function processRealMpesaPayment(phoneNumber, amount, orderId) {
     try {
@@ -174,7 +191,9 @@ function simulatePaymentSuccess(phoneNumber, amount, checkoutRequestID) {
             total: amount
         };
         
+        // Save to both sales database and shared orders
         recordSale(orderData, 'M-Pesa', phoneNumber);
+        saveOrderToSharedDatabase(orderData);
     }
     
     const paymentResult = {
@@ -293,7 +312,9 @@ function handleCardPayment() {
             total: amount
         };
         
+        // Save to both sales database and shared orders
         recordSale(orderData, 'Card');
+        saveOrderToSharedDatabase(orderData);
     }
     
     // Show processing state
@@ -389,7 +410,9 @@ window.processMpesaPayment = function() {
             total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         };
         
+        // Save to both sales database and shared orders
         recordSale(orderData, 'M-Pesa', phoneNumber);
+        saveOrderToSharedDatabase(orderData);
     }
 
     // Simulate processing
@@ -436,7 +459,9 @@ window.processCardPayment = function() {
             total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         };
         
+        // Save to both sales database and shared orders
         recordSale(orderData, 'Card');
+        saveOrderToSharedDatabase(orderData);
     }
 
     // Show processing state
