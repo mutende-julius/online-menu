@@ -1,3 +1,28 @@
+// Sales recording function
+function recordSale(orderData, paymentMethod, customerPhone = null) {
+    const saleData = {
+        orderId: orderData.orderId,
+        tableNumber: orderData.tableNumber,
+        items: orderData.items,
+        totalAmount: orderData.total,
+        paymentMethod: paymentMethod,
+        paymentStatus: 'completed',
+        customerPhone: customerPhone,
+        receiptNumber: 'RCPT' + Date.now().toString().slice(-6)
+    };
+    
+    // Save to sales database
+    if (typeof SalesDatabase !== 'undefined') {
+        SalesDatabase.saveSale(saleData);
+        console.log('Sale recorded:', saleData);
+    } else {
+        // Fallback: Store in localStorage directly
+        console.log('SalesDatabase not available, sale data:', saleData);
+    }
+    
+    return saleData;
+}
+
 // Demo M-Pesa Integration (No backend required)
 async function processRealMpesaPayment(phoneNumber, amount, orderId) {
     try {
@@ -140,6 +165,18 @@ function showMpesaInstructions(phoneNumber, amount, checkoutRequestID) {
 }
 
 function simulatePaymentSuccess(phoneNumber, amount, checkoutRequestID) {
+    // Record the sale before showing success
+    if (window.menuInstance) {
+        const orderData = {
+            orderId: 'ORD' + Date.now().toString().slice(-6),
+            tableNumber: window.menuInstance.currentTable,
+            items: window.menuInstance.cart,
+            total: amount
+        };
+        
+        recordSale(orderData, 'M-Pesa', phoneNumber);
+    }
+    
     const paymentResult = {
         Amount: amount,
         MpesaReceiptNumber: 'DEMO' + Date.now().toString().slice(-8),
@@ -168,5 +205,278 @@ async function checkMpesaPaymentStatus(checkoutRequestID) {
     alert('Demo: Payment status check would happen here');
 }
 
-// Rest of your payment.js code remains the same...
-// [Keep all the other functions like showPaymentSuccess, setupPaymentModal, etc.]
+// Setup payment modal with proper event listeners
+function setupPaymentModal() {
+    const confirmMpesaBtn = document.getElementById('confirmMpesa');
+    const confirmCardBtn = document.getElementById('confirmCard');
+    
+    if (confirmMpesaBtn) {
+        // Remove existing listeners and add new one
+        confirmMpesaBtn.replaceWith(confirmMpesaBtn.cloneNode(true));
+        document.getElementById('confirmMpesa').addEventListener('click', handleMpesaPayment);
+    }
+    
+    if (confirmCardBtn) {
+        confirmCardBtn.replaceWith(confirmCardBtn.cloneNode(true));
+        document.getElementById('confirmCard').addEventListener('click', handleCardPayment);
+    }
+}
+
+// Main M-Pesa payment handler
+function handleMpesaPayment() {
+    const phoneInput = document.getElementById('phoneNumber');
+    if (!phoneInput) {
+        console.error('Phone number input not found');
+        return;
+    }
+    
+    const phoneNumber = phoneInput.value;
+    
+    if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
+        alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
+        return;
+    }
+
+    const paymentTotalEl = document.getElementById('paymentTotal');
+    if (!paymentTotalEl) {
+        console.error('Payment total element not found');
+        return;
+    }
+    
+    const amount = parseInt(paymentTotalEl.textContent.replace(/,/g, '')) || 0;
+    const orderId = 'ORD' + Date.now().toString().slice(-8);
+    
+    // Store order temporarily before payment
+    const orderData = {
+        tableNumber: window.menuInstance?.currentTable || 1,
+        items: window.menuInstance?.cart || [],
+        total: amount,
+        payment_method: 'mpesa',
+        order_id: orderId
+    };
+    
+    // Process real M-Pesa payment
+    processRealMpesaPayment(phoneNumber, amount, orderId);
+}
+
+// Card payment handler
+function handleCardPayment() {
+    const cardNumber = document.getElementById('cardNumber');
+    const expiryDate = document.getElementById('expiryDate');
+    const cvv = document.getElementById('cvv');
+    
+    if (!cardNumber || !expiryDate || !cvv) {
+        console.error('Card input elements not found');
+        return;
+    }
+    
+    if (!cardNumber.value || !expiryDate.value || !cvv.value) {
+        alert('Please fill in all card details');
+        return;
+    }
+
+    const paymentTotalEl = document.getElementById('paymentTotal');
+    if (!paymentTotalEl) {
+        console.error('Payment total element not found');
+        return;
+    }
+    
+    const amount = parseInt(paymentTotalEl.textContent.replace(/,/g, '')) || 0;
+    const orderId = 'ORD' + Date.now().toString().slice(-8);
+    
+    // Record card sale
+    if (window.menuInstance) {
+        const orderData = {
+            orderId: orderId,
+            tableNumber: window.menuInstance.currentTable,
+            items: window.menuInstance.cart,
+            total: amount
+        };
+        
+        recordSale(orderData, 'Card');
+    }
+    
+    // Show processing state
+    const confirmBtn = document.getElementById('confirmCard');
+    if (!confirmBtn) return;
+    
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '⏳ Processing Card...';
+    confirmBtn.disabled = true;
+
+    // Simulate processing
+    setTimeout(() => {
+        confirmBtn.innerHTML = '✅ Payment Successful!';
+        
+        setTimeout(() => {
+            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            }
+            
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+            cardNumber.value = '';
+            expiryDate.value = '';
+            cvv.value = '';
+        }, 1500);
+    }, 3000);
+}
+
+function showPaymentSuccess(paymentResult) {
+    const paymentModal = document.getElementById('paymentModal');
+    if (!paymentModal) return;
+    
+    const modalBody = paymentModal.querySelector('.modal-body');
+    if (!modalBody) return;
+    
+    modalBody.innerHTML = `
+        <div class="payment-success">
+            <div class="success-icon">✅</div>
+            <h3>Payment Successful!</h3>
+            <div class="success-details">
+                <p><strong>Amount:</strong> Ksh ${paymentResult.Amount || 'N/A'}</p>
+                <p><strong>Receipt:</strong> ${paymentResult.MpesaReceiptNumber || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${paymentResult.PhoneNumber || 'N/A'}</p>
+                <p><strong>Time:</strong> ${paymentResult.TransactionDate || 'N/A'}</p>
+            </div>
+            <button id="completeOrder" class="confirm-btn">Complete Order</button>
+        </div>
+    `;
+    
+    const completeBtn = document.getElementById('completeOrder');
+    if (completeBtn) {
+        completeBtn.addEventListener('click', () => {
+            paymentModal.style.display = 'none';
+            // Check if menu object exists before calling
+            if (typeof window.menuInstance !== 'undefined' && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            }
+        });
+    }
+}
+
+// Update the existing payment functions to record sales
+window.processMpesaPayment = function() {
+    const phoneInput = document.getElementById('phoneNumber');
+    if (!phoneInput) {
+        console.error('Phone number input not found');
+        return;
+    }
+    
+    const phoneNumber = phoneInput.value;
+    
+    if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
+        alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
+        return;
+    }
+
+    console.log('Processing M-Pesa payment for:', phoneNumber);
+    
+    // Show processing state
+    const confirmBtn = document.getElementById('confirmMpesa');
+    if (!confirmBtn) return;
+    
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '⏳ Processing M-Pesa...';
+    confirmBtn.disabled = true;
+
+    // Record sale
+    if (window.menuInstance) {
+        const orderData = {
+            orderId: 'ORD' + Date.now().toString().slice(-6),
+            tableNumber: window.menuInstance.currentTable,
+            items: window.menuInstance.cart,
+            total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        };
+        
+        recordSale(orderData, 'M-Pesa', phoneNumber);
+    }
+
+    // Simulate processing
+    setTimeout(() => {
+        confirmBtn.innerHTML = '✅ Payment Successful!';
+        
+        setTimeout(() => {
+            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            } else if (window.menuInstance) {
+                window.menuInstance.completeOrder();
+            }
+            
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+            if (phoneInput) phoneInput.value = '';
+        }, 1500);
+    }, 3000);
+};
+
+window.processCardPayment = function() {
+    const cardNumber = document.getElementById('cardNumber');
+    const expiryDate = document.getElementById('expiryDate');
+    const cvv = document.getElementById('cvv');
+    
+    if (!cardNumber || !expiryDate || !cvv) {
+        console.error('Card input elements not found');
+        return;
+    }
+    
+    if (!cardNumber.value || !expiryDate.value || !cvv.value) {
+        alert('Please fill in all card details');
+        return;
+    }
+
+    console.log('Processing card payment');
+    
+    // Record sale
+    if (window.menuInstance) {
+        const orderData = {
+            orderId: 'ORD' + Date.now().toString().slice(-6),
+            tableNumber: window.menuInstance.currentTable,
+            items: window.menuInstance.cart,
+            total: window.menuInstance.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        };
+        
+        recordSale(orderData, 'Card');
+    }
+
+    // Show processing state
+    const confirmBtn = document.getElementById('confirmCard');
+    if (!confirmBtn) return;
+    
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '⏳ Processing Card...';
+    confirmBtn.disabled = true;
+
+    // Simulate processing
+    setTimeout(() => {
+        confirmBtn.innerHTML = '✅ Payment Successful!';
+        
+        setTimeout(() => {
+            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
+                window.menuInstance.processPaymentSuccess();
+            } else if (window.menuInstance) {
+                window.menuInstance.completeOrder();
+            }
+            
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+            cardNumber.value = '';
+            expiryDate.value = '';
+            cvv.value = '';
+        }, 1500);
+    }, 3000);
+};
+
+// Initialize payment system when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Payment system initializing...');
+    
+    // Wait a bit for other scripts to load
+    setTimeout(() => {
+        setupPaymentModal();
+        console.log('Payment buttons initialized with sales tracking');
+    }, 100);
+});
+
+// Fallback for manual initialization
+window.initializePaymentSystem = setupPaymentModal;

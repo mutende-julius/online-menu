@@ -40,6 +40,10 @@
       "dest": "/admin-setup.html"
     },
     {
+      "src": "/sales-reports",
+      "dest": "/sales-reports.html"
+    },
+    {
       "src": "/test-dashboard",
       "dest": "/test-dashboard.html"
     },
@@ -54,6 +58,10 @@
     {
       "src": "/images/(.*)",
       "dest": "/images/$1"
+    },
+    {
+      "src": "/data/(.*)",
+      "dest": "/data/$1"
     },
     {
       "src": "/(.*)",
