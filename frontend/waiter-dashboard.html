@@ -4,224 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waiter Dashboard - Digital Menu</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <style>
-        .dashboard-container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-        
-        .dashboard-header { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            margin-bottom: 25px; 
-            text-align: center; 
-            border-left: 5px solid #2c5530; 
-        }
-        
-        .orders-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); 
-            gap: 20px; 
-        }
-        
-        .order-card { 
-            background: #f8f9fa; 
-            border: 2px solid #e9ecef; 
-            border-radius: 12px; 
-            padding: 20px; 
-            transition: all 0.3s ease; 
-        }
-        
-        .order-card.pending { 
-            border-left: 5px solid #f39c12; 
-            background: #fffaf0;
-        }
-        
-        .order-card.preparing { 
-            border-left: 5px solid #3498db; 
-            background: #f0f8ff;
-        }
-        
-        .order-card.ready { 
-            border-left: 5px solid #27ae60; 
-            background: #f0fff4;
-        }
-        
-        .order-card.completed { 
-            border-left: 5px solid #95a5a6; 
-            background: #f8f9fa;
-            opacity: 0.7;
-        }
-        
-        .order-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 15px; 
-        }
-        
-        .order-status { 
-            padding: 5px 12px; 
-            border-radius: 15px; 
-            font-size: 0.9em; 
-            font-weight: bold; 
-            color: white; 
-        }
-        
-        .status-pending { 
-            background: #f39c12; 
-        }
-        
-        .status-preparing { 
-            background: #3498db; 
-        }
-        
-        .status-ready { 
-            background: #27ae60; 
-        }
-        
-        .status-completed { 
-            background: #95a5a6; 
-        }
-        
-        .order-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 8px 0; 
-            border-bottom: 1px solid #ecf0f1; 
-        }
-        
-        .action-btn { 
-            padding: 8px 15px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: 500; 
-            margin: 5px; 
-            transition: all 0.3s ease;
-        }
-        
-        .preparing-btn { 
-            background: #3498db; 
-            color: white; 
-        }
-        
-        .preparing-btn:hover { 
-            background: #2980b9; 
-        }
-        
-        .ready-btn { 
-            background: #27ae60; 
-            color: white; 
-        }
-        
-        .ready-btn:hover { 
-            background: #219a52; 
-        }
-        
-        .complete-btn { 
-            background: #2c5530; 
-            color: white; 
-        }
-        
-        .complete-btn:hover { 
-            background: #1e3a22; 
-        }
-        
-        .demo-btn {
-            background: #9b59b6;
-            color: white;
-        }
-        
-        .demo-btn:hover {
-            background: #8e44ad;
-        }
-        
-        .dashboard-controls { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            margin-bottom: 25px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        
-        .filter-buttons { 
-            display: flex; 
-            gap: 10px; 
-            flex-wrap: wrap; 
-        }
-        
-        .filter-btn { 
-            padding: 10px 20px; 
-            border: 2px solid #e0e0e0; 
-            background: white; 
-            border-radius: 25px; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            font-weight: 500; 
-        }
-        
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: #2c5530;
-            color: white;
-            border-color: #2c5530;
-        }
-        
-        .refresh-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-        
-        .refresh-btn:hover {
-            background: #2980b9;
-        }
-        
-        .orders-container {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
-            min-height: 400px;
-        }
-        
-        .no-orders {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-            grid-column: 1 / -1;
-        }
-        
-        .demo-notice {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-        }
-        
-        .live-notice {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            text-align: center;
-        }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .dashboard-header { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; text-align: center; border-left: 5px solid #2c5530; }
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .order-card { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; transition: all 0.3s ease; }
+        .order-card.pending { border-left: 5px solid #f39c12; background: #fffaf0; }
+        .order-card.preparing { border-left: 5px solid #3498db; background: #f0f8ff; }
+        .order-card.ready { border-left: 5px solid #27ae60; background: #f0fff4; }
+        .order-card.completed { border-left: 5px solid #95a5a6; background: #f8f9fa; opacity: 0.7; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .order-status { padding: 5px 12px; border-radius: 15px; font-size: 0.9em; font-weight: bold; color: white; }
+        .status-pending { background: #f39c12; }
+        .status-preparing { background: #3498db; }
+        .status-ready { background: #27ae60; }
+        .status-completed { background: #95a5a6; }
+        .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ecf0f1; }
+        .action-btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; transition: all 0.3s ease; }
+        .preparing-btn { background: #3498db; color: white; }
+        .preparing-btn:hover { background: #2980b9; }
+        .ready-btn { background: #27ae60; color: white; }
+        .ready-btn:hover { background: #219a52; }
+        .complete-btn { background: #2c5530; color: white; }
+        .complete-btn:hover { background: #1e3a22; }
+        .demo-btn { background: #9b59b6; color: white; }
+        .demo-btn:hover { background: #8e44ad; }
+        .dashboard-controls { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .filter-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
+        .filter-btn.active, .filter-btn:hover { background: #2c5530; color: white; border-color: #2c5530; }
+        .refresh-btn { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.3s ease; }
+        .refresh-btn:hover { background: #2980b9; }
+        .orders-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; min-height: 400px; }
+        .no-orders { text-align: center; padding: 60px 20px; color: #7f8c8d; grid-column: 1 / -1; }
+        .live-notice { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
+        .error-notice { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -242,7 +60,7 @@
             </div>
         </div>
 
-        <div class="live-notice">
+        <div id="connectionStatus" class="live-notice">
             <strong>🔄 LIVE MODE ACTIVE</strong> - Orders from customers appear here automatically. Auto-refreshes every 10 seconds.
         </div>
 
@@ -259,20 +77,102 @@
 
         <div class="orders-container">
             <div class="orders-grid" id="ordersList">
-                <!-- Orders will be loaded here -->
                 <div class="no-orders">
-                    <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
-                    <h3>No Orders Yet</h3>
-                    <p>Orders from customers will appear here automatically.</p>
-                    <button class="action-btn demo-btn" onclick="addTestOrder()" style="margin-top: 15px;">
-                        ➕ Add Test Order
-                    </button>
+                    <div style="font-size: 80px; margin-bottom: 20px;">⏳</div>
+                    <h3>Loading Orders...</h3>
+                    <p>Please wait while we connect to the order database.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="data/shared-orders.js"></script>
+    <!-- INLINE SHARED ORDERS DATABASE - No external file needed -->
+    <script>
+        // Shared Orders Database (connects customer and waiter)
+        window.SharedOrders = {
+            // Initialize orders data
+            init: function() {
+                if (!localStorage.getItem('sharedOrders')) {
+                    const initialData = {
+                        orders: [],
+                        nextOrderId: 1
+                    };
+                    localStorage.setItem('sharedOrders', JSON.stringify(initialData));
+                }
+                return JSON.parse(localStorage.getItem('sharedOrders'));
+            },
+
+            // Save a new order from customer
+            saveOrder: function(orderData) {
+                const data = this.init();
+                
+                const order = {
+                    id: 'ORD' + data.nextOrderId.toString().padStart(6, '0'),
+                    tableNumber: orderData.tableNumber,
+                    items: orderData.items,
+                    totalAmount: orderData.totalAmount,
+                    status: 'pending',
+                    customerName: orderData.customerName || `Table ${orderData.tableNumber}`,
+                    createdAt: new Date().toISOString(),
+                    createdAtFormatted: new Date().toLocaleTimeString()
+                };
+
+                data.orders.unshift(order);
+                data.nextOrderId++;
+                
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                console.log('Order saved to shared database:', order);
+                return order;
+            },
+
+            // Get all orders for waiter dashboard
+            getAllOrders: function() {
+                const data = this.init();
+                return data.orders;
+            },
+
+            // Update order status (waiter actions)
+            updateOrderStatus: function(orderId, newStatus) {
+                const data = this.init();
+                const order = data.orders.find(o => o.id === orderId);
+                
+                if (order) {
+                    order.status = newStatus;
+                    order.updatedAt = new Date().toISOString();
+                    localStorage.setItem('sharedOrders', JSON.stringify(data));
+                    console.log('Order status updated:', orderId, '->', newStatus);
+                    return true;
+                }
+                return false;
+            },
+
+            // Complete/remove order
+            completeOrder: function(orderId) {
+                const data = this.init();
+                data.orders = data.orders.filter(order => order.id !== orderId);
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                console.log('Order completed/removed:', orderId);
+            },
+
+            // Get orders by status
+            getOrdersByStatus: function(status) {
+                const data = this.init();
+                if (status === 'all') return data.orders;
+                return data.orders.filter(order => order.status === status);
+            },
+
+            // Clear all orders (for testing)
+            clearAllOrders: function() {
+                const initialData = {
+                    orders: [],
+                    nextOrderId: 1
+                };
+                localStorage.setItem('sharedOrders', JSON.stringify(initialData));
+                console.log('All orders cleared');
+            }
+        };
+    </script>
+
     <script>
         // Shared orders data - connects with customer menu
         let sharedOrders = [];
@@ -280,17 +180,28 @@
         function loadOrders(filter = 'all') {
             const ordersList = document.getElementById('ordersList');
             const ordersCount = document.getElementById('ordersCount');
+            const connectionStatus = document.getElementById('connectionStatus');
             
-            // Use shared orders database if available
+            // Use shared orders database
             if (typeof SharedOrders !== 'undefined') {
                 sharedOrders = SharedOrders.getAllOrders();
+                connectionStatus.className = 'live-notice';
+                connectionStatus.innerHTML = '<strong>🔄 LIVE MODE ACTIVE</strong> - Orders from customers appear here automatically. Auto-refreshes every 10 seconds.';
             } else {
                 console.error('SharedOrders database not available');
+                connectionStatus.className = 'error-notice';
+                connectionStatus.innerHTML = '<strong>❌ DATABASE ERROR</strong> - Please refresh the page. If error persists, clear browser cache.';
                 ordersList.innerHTML = `
                     <div class="no-orders">
                         <div style="font-size: 80px; margin-bottom: 20px;">❌</div>
-                        <h3>Database Error</h3>
-                        <p>Shared orders database not loaded. Please refresh the page.</p>
+                        <h3>Database Connection Error</h3>
+                        <p>Shared orders database not loaded.</p>
+                        <button class="action-btn demo-btn" onclick="window.location.reload()" style="margin-top: 15px;">
+                            🔄 Refresh Page
+                        </button>
+                        <button class="action-btn" style="background: #e74c3c; color: white; margin-top: 10px;" onclick="localStorage.clear(); window.location.reload()">
+                            🗑️ Clear Cache & Refresh
+                        </button>
                     </div>
                 `;
                 return;
@@ -389,7 +300,6 @@
             if (typeof SharedOrders !== 'undefined') {
                 const success = SharedOrders.updateOrderStatus(orderId, newStatus);
                 if (success) {
-                    // Show status update message
                     const statusMessages = {
                         'preparing': '👨‍🍳 Order is now being prepared',
                         'ready': '✅ Order is ready for serving',
@@ -403,7 +313,7 @@
                     loadOrders();
                 }
             } else {
-                alert('Error: Cannot update order status - database not available');
+                alert('Error: Cannot update order status');
             }
         }
 
@@ -416,7 +326,6 @@
             }
         }
 
-        // Add test order for demonstration
         function addTestOrder() {
             if (typeof SharedOrders !== 'undefined') {
                 const testOrder = {
@@ -447,7 +356,7 @@
             });
         });
 
-        // Auto-refresh every 10 seconds to check for new orders from customers
+        // Auto-refresh every 10 seconds
         setInterval(() => {
             const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
             loadOrders(activeFilter);
@@ -467,7 +376,7 @@
         // Load orders when page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadOrders();
-            console.log('Waiter Dashboard loaded with shared orders system');
+            console.log('Waiter Dashboard loaded with inline shared orders');
         });
     </script>
 </body>
