@@ -1,3 +1,64 @@
+// SHARED ORDERS DATABASE FALLBACK - Add this at the VERY TOP of payment.js
+if (typeof SharedOrders === 'undefined') {
+    console.log('🔄 Creating SharedOrders fallback...');
+    window.SharedOrders = {
+        init: function() {
+            if (!localStorage.getItem('sharedOrders')) {
+                const initialData = {
+                    orders: [],
+                    nextOrderId: 1
+                };
+                localStorage.setItem('sharedOrders', JSON.stringify(initialData));
+            }
+            return JSON.parse(localStorage.getItem('sharedOrders'));
+        },
+
+        saveOrder: function(orderData) {
+            const data = this.init();
+            
+            const order = {
+                id: 'ORD' + data.nextOrderId.toString().padStart(6, '0'),
+                tableNumber: orderData.tableNumber,
+                items: orderData.items,
+                totalAmount: orderData.totalAmount,
+                status: 'pending',
+                customerName: orderData.customerName || `Table ${orderData.tableNumber}`,
+                createdAt: new Date().toISOString(),
+                createdAtFormatted: new Date().toLocaleTimeString()
+            };
+
+            data.orders.unshift(order);
+            data.nextOrderId++;
+            
+            localStorage.setItem('sharedOrders', JSON.stringify(data));
+            console.log('🎯 ORDER SAVED TO WAITER DASHBOARD:', order);
+            return order;
+        },
+
+        getAllOrders: function() {
+            const data = this.init();
+            return data.orders;
+        },
+
+        updateOrderStatus: function(orderId, newStatus) {
+            const data = this.init();
+            const order = data.orders.find(o => o.id === orderId);
+            
+            if (order) {
+                order.status = newStatus;
+                order.updatedAt = new Date().toISOString();
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                console.log('Order status updated:', orderId, '->', newStatus);
+                return true;
+            }
+            return false;
+        }
+    };
+    console.log('✅ SharedOrders fallback created!');
+} else {
+    console.log('✅ SharedOrders already available!');
+}
+
 // Sales recording function
 function recordSale(orderData, paymentMethod, customerPhone = null) {
     const saleData = {
