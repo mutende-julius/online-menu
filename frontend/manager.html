@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard - Savanna Grill & Bar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #2c3e50; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .orders { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .high-value { background: #e8f5e8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍💼 Manager Dashboard</h1>
+            <p>Savanna Grill & Bar - Business Overview</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>💰 Today's Revenue</h3>
+                <h2 id="todayRevenue">Ksh 0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>📊 Total Orders</h3>
+                <h2 id="totalOrders">0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>🍽️ Active Tables</h3>
+                <h2 id="activeTables">0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>⭐ Popular Item</h3>
+                <h2 id="popularItem">-</h2>
+            </div>
+        </div>
+
+        <div class="orders">
+            <h2>📋 Recent Orders</h2>
+            <div id="recentOrders">Loading orders...</div>
+        </div>
+
+        <div class="orders">
+            <h2>📈 Sales Analytics</h2>
+            <p><strong>Feature Coming Soon:</strong> Charts, reports, and detailed analytics</p>
+        </div>
+    </div>
+
+    <script>
+        // Manager Dashboard Functions
+        function loadManagerData() {
+            // Get orders from shared database
+            if (typeof SharedOrders !== 'undefined') {
+                const orders = SharedOrders.getAllOrders();
+                displayManagerData(orders);
+            } else {
+                // Fallback: Try to access localStorage directly
+                try {
+                    const sharedData = JSON.parse(localStorage.getItem('sharedOrders') || '{"orders":[]}');
+                    displayManagerData(sharedData.orders);
+                } catch (error) {
+                    document.getElementById('recentOrders').innerHTML = 'Error loading orders';
+                }
+            }
+        }
+
+        function displayManagerData(orders) {
+            // Calculate stats
+            const today = new Date().toDateString();
+            const todayOrders = orders.filter(order => 
+                new Date(order.createdAt).toDateString() === today
+            );
+            
+            const todayRevenue = todayOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+            const activeTables = [...new Set(orders.filter(o => o.status !== 'completed').map(o => o.tableNumber))];
+            
+            // Find popular item
+            const allItems = orders.flatMap(order => order.items);
+            const itemCount = {};
+            allItems.forEach(item => {
+                itemCount[item.name] = (itemCount[item.name] || 0) + item.quantity;
+            });
+            const popularItem = Object.keys(itemCount).reduce((a, b) => 
+                itemCount[a] > itemCount[b] ? a : b, 'None'
+            );
+
+            // Update display
+            document.getElementById('todayRevenue').textContent = `Ksh ${todayRevenue.toLocaleString()}`;
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('activeTables').textContent = activeTables.length;
+            document.getElementById('popularItem').textContent = popularItem;
+
+            // Display recent orders
+            const recentOrders = orders.slice(0, 10);
+            document.getElementById('recentOrders').innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Table</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentOrders.map(order => `
+                            <tr class="${order.totalAmount > 1000 ? 'high-value' : ''}">
+                                <td>${order.id}</td>
+                                <td>${order.tableNumber}</td>
+                                <td>Ksh ${order.totalAmount?.toLocaleString() || '0'}</td>
+                                <td>${order.status}</td>
+                                <td>${order.createdAtFormatted || new Date(order.createdAt).toLocaleTimeString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                ${orders.length === 0 ? '<p>No orders yet</p>' : ''}
+            `;
+        }
+
+        // Load data when page opens
+        document.addEventListener('DOMContentLoaded', function() {
+            loadManagerData();
+            // Refresh every 10 seconds
+            setInterval(loadManagerData, 10000);
+        });
+    </script>
+</body>
+</html>
