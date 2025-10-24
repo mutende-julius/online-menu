@@ -32,6 +32,14 @@
       "dest": "/waiter-dashboard.html"
     },
     {
+      "src": "/manager",
+      "dest": "/manager.html"
+    },
+    {
+      "src": "/waiter-inventory",
+      "dest": "/waiter-inventory.html"
+    },
+    {
       "src": "/admin-dashboard",
       "dest": "/admin-dashboard.html"
     },
@@ -64,7 +72,7 @@
       "dest": "/data/$1"
     },
     {
-      "src": "/(.*)",
+      "src": "/",
       "dest": "/index.html"
     }
   ]
