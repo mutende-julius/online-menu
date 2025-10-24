@@ -142,6 +142,19 @@ window.DigitalMenu = window.DigitalMenu || class {
                 });
             }
         });
+
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', (e) => {
+                paymentMethods.forEach(m => m.classList.remove('active'));
+                method.classList.add('active');
+                
+                const methodType = method.dataset.method;
+                document.querySelectorAll('.payment-form').forEach(form => form.classList.remove('active'));
+                document.getElementById(methodType + 'Form').classList.add('active');
+            });
+        });
     }
 
     renderMenu(category = 'all') {
@@ -417,123 +430,11 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         menuInstance = new window.DigitalMenu();
         window.menuInstance = menuInstance; // Make available globally
-        
-        // Setup payment buttons with null checks
-        setTimeout(() => {
-            const confirmMpesaBtn = document.getElementById('confirmMpesa');
-            const confirmCardBtn = document.getElementById('confirmCard');
-            const closeSuccessBtn = document.getElementById('closeSuccess');
-            
-            if (confirmMpesaBtn) {
-                confirmMpesaBtn.addEventListener('click', window.processMpesaPayment);
-            }
-            
-            if (confirmCardBtn) {
-                confirmCardBtn.addEventListener('click', window.processCardPayment);
-            }
-            
-            if (closeSuccessBtn) {
-                closeSuccessBtn.addEventListener('click', () => {
-                    const successModal = document.getElementById('successModal');
-                    if (successModal) successModal.style.display = 'none';
-                });
-            }
-            
-            console.log('All event listeners initialized');
-        }, 500);
-        
+        console.log('✅ Menu instance created and available globally');
     } catch (error) {
         console.error('Failed to initialize menu:', error);
     }
 });
-
-// Global payment functions with null checks
-window.processMpesaPayment = function() {
-    const phoneInput = document.getElementById('phoneNumber');
-    if (!phoneInput) {
-        console.error('Phone number input not found');
-        return;
-    }
-    
-    const phoneNumber = phoneInput.value;
-    
-    if (!phoneNumber || phoneNumber.length !== 10 || !phoneNumber.startsWith('07')) {
-        alert('Please enter a valid M-Pesa phone number (10 digits starting with 07)');
-        return;
-    }
-
-    console.log('Processing M-Pesa payment for:', phoneNumber);
-    
-    // Show processing state
-    const confirmBtn = document.getElementById('confirmMpesa');
-    if (!confirmBtn) return;
-    
-    const originalText = confirmBtn.innerHTML;
-    confirmBtn.innerHTML = '⏳ Processing M-Pesa...';
-    confirmBtn.disabled = true;
-
-    // Simulate processing
-    setTimeout(() => {
-        confirmBtn.innerHTML = '✅ Payment Successful!';
-        
-        setTimeout(() => {
-            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
-                window.menuInstance.processPaymentSuccess();
-            } else if (window.menuInstance) {
-                window.menuInstance.completeOrder();
-            }
-            
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
-            if (phoneInput) phoneInput.value = '';
-        }, 1500);
-    }, 3000);
-};
-
-window.processCardPayment = function() {
-    const cardNumber = document.getElementById('cardNumber');
-    const expiryDate = document.getElementById('expiryDate');
-    const cvv = document.getElementById('cvv');
-    
-    if (!cardNumber || !expiryDate || !cvv) {
-        console.error('Card input elements not found');
-        return;
-    }
-    
-    if (!cardNumber.value || !expiryDate.value || !cvv.value) {
-        alert('Please fill in all card details');
-        return;
-    }
-
-    console.log('Processing card payment');
-    
-    // Show processing state
-    const confirmBtn = document.getElementById('confirmCard');
-    if (!confirmBtn) return;
-    
-    const originalText = confirmBtn.innerHTML;
-    confirmBtn.innerHTML = '⏳ Processing Card...';
-    confirmBtn.disabled = true;
-
-    // Simulate processing
-    setTimeout(() => {
-        confirmBtn.innerHTML = '✅ Payment Successful!';
-        
-        setTimeout(() => {
-            if (window.menuInstance && window.menuInstance.processPaymentSuccess) {
-                window.menuInstance.processPaymentSuccess();
-            } else if (window.menuInstance) {
-                window.menuInstance.completeOrder();
-            }
-            
-            confirmBtn.innerHTML = originalText;
-            confirmBtn.disabled = false;
-            cardNumber.value = '';
-            expiryDate.value = '';
-            cvv.value = '';
-        }, 1500);
-    }, 3000);
-};
 
 // Fallback initialization for manual calls
 window.initializeMenu = function() {
