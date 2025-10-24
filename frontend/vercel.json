@@ -36,7 +36,7 @@
       "dest": "/manager.html"
     },
     {
-      "src": "/waiter-inventory",
+      "src": "/inventory",
       "dest": "/waiter-inventory.html"
     },
     {
