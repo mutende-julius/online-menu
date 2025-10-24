@@ -3,380 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waiter Dashboard - Digital Menu</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>Waiter Dashboard - Savanna Grill</title>
     <style>
-        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .dashboard-header { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; text-align: center; border-left: 5px solid #2c5530; }
-        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .order-card { background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 20px; transition: all 0.3s ease; }
-        .order-card.pending { border-left: 5px solid #f39c12; background: #fffaf0; }
-        .order-card.preparing { border-left: 5px solid #3498db; background: #f0f8ff; }
-        .order-card.ready { border-left: 5px solid #27ae60; background: #f0fff4; }
-        .order-card.completed { border-left: 5px solid #95a5a6; background: #f8f9fa; opacity: 0.7; }
-        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .order-status { padding: 5px 12px; border-radius: 15px; font-size: 0.9em; font-weight: bold; color: white; }
-        .status-pending { background: #f39c12; }
-        .status-preparing { background: #3498db; }
-        .status-ready { background: #27ae60; }
-        .status-completed { background: #95a5a6; }
-        .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ecf0f1; }
-        .action-btn { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; margin: 5px; transition: all 0.3s ease; }
-        .preparing-btn { background: #3498db; color: white; }
-        .preparing-btn:hover { background: #2980b9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: #2c3e50; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .orders-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .order-card { background: white; padding: 20px; border-radius: 10px; border-left: 5px solid #e74c3c; }
+        .order-card.pending { border-left-color: #e74c3c; }
+        .order-card.preparing { border-left-color: #f39c12; }
+        .order-card.ready { border-left-color: #27ae60; }
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .order-items { margin: 10px 0; }
+        .order-item { display: flex; justify-content: space-between; padding: 5px 0; }
+        .order-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .status-btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        .preparing-btn { background: #f39c12; color: white; }
         .ready-btn { background: #27ae60; color: white; }
-        .ready-btn:hover { background: #219a52; }
-        .complete-btn { background: #2c5530; color: white; }
-        .complete-btn:hover { background: #1e3a22; }
-        .demo-btn { background: #9b59b6; color: white; }
-        .demo-btn:hover { background: #8e44ad; }
-        .dashboard-controls { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-        .filter-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-        .filter-btn { padding: 10px 20px; border: 2px solid #e0e0e0; background: white; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
-        .filter-btn.active, .filter-btn:hover { background: #2c5530; color: white; border-color: #2c5530; }
-        .refresh-btn { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; transition: background 0.3s ease; }
-        .refresh-btn:hover { background: #2980b9; }
-        .orders-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; min-height: 400px; }
-        .no-orders { text-align: center; padding: 60px 20px; color: #7f8c8d; grid-column: 1 / -1; }
-        .live-notice { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
-        .error-notice { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: center; }
+        .complete-btn { background: #3498db; color: white; }
+        .no-orders { text-align: center; padding: 40px; color: #7f8c8d; grid-column: 1 / -1; }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>👨‍🍳 Waiter Dashboard</h1>
-            <p>Manage orders in real-time • <strong>Live Orders Connected</strong></p>
+    <div class="container">
+        <div class="header">
+            <h1>👨‍🍳 WAITER DASHBOARD</h1>
+            <p>Savanna Grill & Bar - Live Order Management</p>
             <div style="margin-top: 15px;">
-                <span style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
-                    📱 Live Connected
+                <span style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px;">
+                    📱 Connected to Customer Orders
                 </span>
-                <span id="orderCount" style="background: #2c5530; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; margin-left: 10px;">
-                    Orders: <span id="ordersCount">0</span>
-                </span>
-                <button class="action-btn demo-btn" onclick="addTestOrder()" style="margin-left: 10px;">
-                    ➕ Add Test Order
-                </button>
             </div>
         </div>
-
-        <div id="connectionStatus" class="live-notice">
-            <strong>🔄 LIVE MODE ACTIVE</strong> - Orders from customers appear here automatically. Auto-refreshes every 10 seconds.
-        </div>
-
-        <div class="dashboard-controls">
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Orders</button>
-                <button class="filter-btn" data-filter="pending">Pending</button>
-                <button class="filter-btn" data-filter="preparing">Preparing</button>
-                <button class="filter-btn" data-filter="ready">Ready</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-            </div>
-            <button class="refresh-btn" onclick="loadOrders()">🔄 Refresh Now</button>
-        </div>
-
-        <div class="orders-container">
-            <div class="orders-grid" id="ordersList">
-                <div class="no-orders">
-                    <div style="font-size: 80px; margin-bottom: 20px;">⏳</div>
-                    <h3>Loading Orders...</h3>
-                    <p>Please wait while we connect to the order database.</p>
-                </div>
-            </div>
+        
+        <div class="orders-container" id="ordersContainer">
+            <div class="no-orders">Loading orders...</div>
         </div>
     </div>
 
-    <!-- INLINE SHARED ORDERS DATABASE - No external file needed -->
     <script>
-        // Shared Orders Database (connects customer and waiter)
+        // Shared Orders Database
         window.SharedOrders = {
-            // Initialize orders data
             init: function() {
                 if (!localStorage.getItem('sharedOrders')) {
-                    const initialData = {
-                        orders: [],
-                        nextOrderId: 1
-                    };
+                    const initialData = { orders: [], nextOrderId: 1 };
                     localStorage.setItem('sharedOrders', JSON.stringify(initialData));
                 }
                 return JSON.parse(localStorage.getItem('sharedOrders'));
             },
-
-            // Save a new order from customer
-            saveOrder: function(orderData) {
-                const data = this.init();
-                
-                const order = {
-                    id: 'ORD' + data.nextOrderId.toString().padStart(6, '0'),
-                    tableNumber: orderData.tableNumber,
-                    items: orderData.items,
-                    totalAmount: orderData.totalAmount,
-                    status: 'pending',
-                    customerName: orderData.customerName || `Table ${orderData.tableNumber}`,
-                    createdAt: new Date().toISOString(),
-                    createdAtFormatted: new Date().toLocaleTimeString()
-                };
-
-                data.orders.unshift(order);
-                data.nextOrderId++;
-                
-                localStorage.setItem('sharedOrders', JSON.stringify(data));
-                console.log('Order saved to shared database:', order);
-                return order;
-            },
-
-            // Get all orders for waiter dashboard
             getAllOrders: function() {
                 const data = this.init();
                 return data.orders;
             },
-
-            // Update order status (waiter actions)
             updateOrderStatus: function(orderId, newStatus) {
                 const data = this.init();
                 const order = data.orders.find(o => o.id === orderId);
-                
                 if (order) {
                     order.status = newStatus;
                     order.updatedAt = new Date().toISOString();
                     localStorage.setItem('sharedOrders', JSON.stringify(data));
-                    console.log('Order status updated:', orderId, '->', newStatus);
                     return true;
                 }
                 return false;
-            },
-
-            // Complete/remove order
-            completeOrder: function(orderId) {
-                const data = this.init();
-                data.orders = data.orders.filter(order => order.id !== orderId);
-                localStorage.setItem('sharedOrders', JSON.stringify(data));
-                console.log('Order completed/removed:', orderId);
-            },
-
-            // Get orders by status
-            getOrdersByStatus: function(status) {
-                const data = this.init();
-                if (status === 'all') return data.orders;
-                return data.orders.filter(order => order.status === status);
-            },
-
-            // Clear all orders (for testing)
-            clearAllOrders: function() {
-                const initialData = {
-                    orders: [],
-                    nextOrderId: 1
-                };
-                localStorage.setItem('sharedOrders', JSON.stringify(initialData));
-                console.log('All orders cleared');
             }
         };
-    </script>
 
-    <script>
-        // Shared orders data - connects with customer menu
-        let sharedOrders = [];
-
-        function loadOrders(filter = 'all') {
-            const ordersList = document.getElementById('ordersList');
-            const ordersCount = document.getElementById('ordersCount');
-            const connectionStatus = document.getElementById('connectionStatus');
+        function loadOrders() {
+            const orders = SharedOrders.getAllOrders();
+            const container = document.getElementById('ordersContainer');
             
-            // Use shared orders database
-            if (typeof SharedOrders !== 'undefined') {
-                sharedOrders = SharedOrders.getAllOrders();
-                connectionStatus.className = 'live-notice';
-                connectionStatus.innerHTML = '<strong>🔄 LIVE MODE ACTIVE</strong> - Orders from customers appear here automatically. Auto-refreshes every 10 seconds.';
-            } else {
-                console.error('SharedOrders database not available');
-                connectionStatus.className = 'error-notice';
-                connectionStatus.innerHTML = '<strong>❌ DATABASE ERROR</strong> - Please refresh the page. If error persists, clear browser cache.';
-                ordersList.innerHTML = `
-                    <div class="no-orders">
-                        <div style="font-size: 80px; margin-bottom: 20px;">❌</div>
-                        <h3>Database Connection Error</h3>
-                        <p>Shared orders database not loaded.</p>
-                        <button class="action-btn demo-btn" onclick="window.location.reload()" style="margin-top: 15px;">
-                            🔄 Refresh Page
-                        </button>
-                        <button class="action-btn" style="background: #e74c3c; color: white; margin-top: 10px;" onclick="localStorage.clear(); window.location.reload()">
-                            🗑️ Clear Cache & Refresh
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-            
-            let filteredOrders = sharedOrders;
-            
-            if (filter !== 'all') {
-                filteredOrders = sharedOrders.filter(order => order.status === filter);
-            }
-
-            if (filteredOrders.length === 0) {
-                ordersList.innerHTML = `
-                    <div class="no-orders">
-                        <div style="font-size: 80px; margin-bottom: 20px;">📝</div>
-                        <h3>No ${filter === 'all' ? '' : filter} Orders</h3>
-                        <p>${filter === 'all' ? 'Orders from customers will appear here automatically.' : `No ${filter} orders found.`}</p>
-                        ${filter === 'all' ? `<button class="action-btn demo-btn" onclick="addTestOrder()" style="margin-top: 15px;">
-                            ➕ Add Test Order
-                        </button>` : ''}
-                    </div>
-                `;
-                ordersCount.textContent = '0';
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="no-orders">📝 No orders yet<br><small>Customer orders will appear here automatically</small></div>';
                 return;
             }
 
-            ordersCount.textContent = filteredOrders.length;
-            
-            ordersList.innerHTML = filteredOrders.map(order => `
-                <div class="order-card ${order.status}">
+            container.innerHTML = orders.map(order => `
+                <div class="order-card ${order.status || 'pending'}">
                     <div class="order-header">
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <div class="order-id" style="font-weight: bold; color: #2c5530; font-size: 1.1em;">${order.id}</div>
-                            <div style="font-size: 0.9em; color: #7f8c8d; margin-top: 2px;">
-                                ${order.customerName || 'Customer'}
-                            </div>
+                        <div>
+                            <strong>${order.id}</strong>
+                            <div>Table ${order.tableNumber}</div>
+                            <div>${order.customerName}</div>
                         </div>
-                        <div class="order-status status-${order.status}">
-                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </div>
-                    </div>
-                    
-                    <div class="order-info">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="color: #7f8c8d; font-weight: 500;">Table:</span>
-                            <span style="font-weight: bold; color: #2c3e50;">${order.tableNumber}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="color: #7f8c8d; font-weight: 500;">Amount:</span>
-                            <span style="font-weight: bold; color: #2c5530;">Ksh ${order.totalAmount.toLocaleString()}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="color: #7f8c8d; font-weight: 500;">Time:</span>
-                            <span style="font-weight: bold; color: #2c3e50;">${order.createdAtFormatted || new Date(order.createdAt).toLocaleTimeString()}</span>
+                        <div>
+                            <div>${order.createdAtFormatted || 'Just now'}</div>
+                            <div>Status: <strong>${order.status || 'pending'}</strong></div>
                         </div>
                     </div>
-                    
-                    <div class="order-items" style="margin-top: 15px;">
-                        <strong style="color: #2c5530;">Items:</strong>
+                    <div class="order-items">
                         ${order.items.map(item => `
                             <div class="order-item">
-                                <span class="item-name">${item.name}</span>
-                                <span style="color: #7f8c8d; margin-left: 10px;">x${item.quantity}</span>
-                                <span style="font-weight: bold; color: #2c5530;">Ksh ${(item.price * item.quantity).toLocaleString()}</span>
+                                <span>${item.name} x${item.quantity}</span>
+                                <span>Ksh ${(item.price * item.quantity).toLocaleString()}</span>
                             </div>
                         `).join('')}
                     </div>
-                    
-                    <div class="order-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-                        ${order.status === 'pending' ? `
-                            <button class="action-btn preparing-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
-                                👨‍🍳 Start Preparing
-                            </button>
-                        ` : ''}
-                        ${order.status === 'preparing' ? `
-                            <button class="action-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
-                                ✅ Mark Ready
-                            </button>
-                        ` : ''}
-                        ${order.status === 'ready' ? `
-                            <button class="action-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
-                                🎉 Mark Served
-                            </button>
-                        ` : ''}
-                        ${order.status === 'completed' ? `
-                            <button class="action-btn" style="background: #e74c3c; color: white;" onclick="deleteOrder('${order.id}')">
-                                🗑️ Remove
-                            </button>
-                        ` : ''}
+                    <div class="order-total">
+                        <strong>Total: Ksh ${order.totalAmount.toLocaleString()}</strong>
+                    </div>
+                    <div class="order-actions">
+                        <button class="status-btn preparing-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
+                            👨‍🍳 Preparing
+                        </button>
+                        <button class="status-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
+                            ✅ Ready
+                        </button>
+                        <button class="status-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
+                            🎉 Served
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
 
         function updateOrderStatus(orderId, newStatus) {
-            if (typeof SharedOrders !== 'undefined') {
-                const success = SharedOrders.updateOrderStatus(orderId, newStatus);
-                if (success) {
-                    const statusMessages = {
-                        'preparing': '👨‍🍳 Order is now being prepared',
-                        'ready': '✅ Order is ready for serving',
-                        'completed': '🎉 Order has been served'
-                    };
-                    
-                    if (statusMessages[newStatus]) {
-                        alert(statusMessages[newStatus]);
-                    }
-                    
-                    loadOrders();
-                }
-            } else {
-                alert('Error: Cannot update order status');
-            }
-        }
-
-        function deleteOrder(orderId) {
-            if (confirm('Remove this completed order from the dashboard?')) {
-                if (typeof SharedOrders !== 'undefined') {
-                    SharedOrders.completeOrder(orderId);
-                    loadOrders();
-                }
-            }
-        }
-
-        function addTestOrder() {
-            if (typeof SharedOrders !== 'undefined') {
-                const testOrder = {
-                    tableNumber: Math.floor(Math.random() * 10) + 1,
-                    items: [
-                        { name: 'Tea', quantity: 1, price: 20 },
-                        { name: '2 Chapati + Beans', quantity: 1, price: 80 }
-                    ],
-                    totalAmount: 100,
-                    customerName: 'Test Customer'
-                };
-                
-                SharedOrders.saveOrder(testOrder);
+            if (SharedOrders.updateOrderStatus(orderId, newStatus)) {
                 loadOrders();
-                alert('✅ Test order added!\nTable: ' + testOrder.tableNumber + '\nAmount: Ksh ' + testOrder.totalAmount);
-            } else {
-                alert('Error: Shared orders database not available');
             }
         }
 
-        // Filter buttons functionality
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const filter = this.dataset.filter;
-                loadOrders(filter);
-            });
-        });
-
-        // Auto-refresh every 10 seconds
-        setInterval(() => {
-            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
-            loadOrders(activeFilter);
-        }, 10000);
-
-        // Clear all orders (for testing)
-        window.clearAllOrders = function() {
-            if (confirm('Clear all orders? This cannot be undone.')) {
-                if (typeof SharedOrders !== 'undefined') {
-                    SharedOrders.clearAllOrders();
-                    loadOrders();
-                    alert('All orders cleared');
-                }
-            }
-        };
-
-        // Load orders when page loads
-        document.addEventListener('DOMContentLoaded', () => {
+        // Auto-refresh every 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
             loadOrders();
-            console.log('Waiter Dashboard loaded with inline shared orders');
+            setInterval(loadOrders, 5000);
         });
     </script>
 </body>
