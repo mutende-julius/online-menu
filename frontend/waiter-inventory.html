@@ -3,45 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management - Savanna Grill</title>
+    <title>Inventory Management - Savanna Grill & Bar</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .inventory-list { background: white; padding: 20px; border-radius: 10px; }
-        .inventory-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c5530, #4a7c59); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 25px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #3498db; }
+        .inventory-list { padding: 25px; }
+        .inventory-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #ecf0f1; transition: all 0.3s ease; }
+        .inventory-item:hover { background: #f8f9fa; }
         .item-info { flex: 1; }
-        .item-name { font-weight: bold; color: #2c3e50; }
-        .item-quantity { font-size: 1.2em; }
+        .item-name { font-weight: bold; color: #2c3e50; font-size: 1.1em; }
+        .item-quantity { font-size: 1.2em; margin-top: 5px; }
         .low-stock { color: #e74c3c; font-weight: bold; }
         .in-stock { color: #27ae60; }
         .out-of-stock { color: #95a5a6; text-decoration: line-through; }
-        .quantity-controls { display: flex; align-items: center; gap: 10px; }
-        .quantity-btn { padding: 5px 15px; border: none; border-radius: 5px; cursor: pointer; }
+        .quantity-controls { display: flex; align-items: center; gap: 12px; }
+        .quantity-input { width: 80px; padding: 10px; border: 2px solid #bdc3c7; border-radius: 8px; text-align: center; font-size: 1em; }
+        .action-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
         .add-btn { background: #27ae60; color: white; }
+        .add-btn:hover { background: #219a52; transform: translateY(-2px); }
         .reduce-btn { background: #e74c3c; color: white; }
-        .quantity-input { width: 60px; padding: 5px; text-align: center; }
-        .update-btn { background: #3498db; color: white; padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .reduce-btn:hover { background: #c0392b; transform: translateY(-2px); }
+        .update-btn { background: #3498db; color: white; }
+        .update-btn:hover { background: #2980b9; transform: translateY(-2px); }
+        .restock-btn { background: #9b59b6; color: white; margin-left: 10px; }
+        .restock-btn:hover { background: #8e44ad; transform: translateY(-2px); }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>📦 Inventory Management</h1>
-            <p>Savanna Grill & Bar - Stock Control</p>
+            <p>Savanna Grill & Bar - Stock Control System</p>
         </div>
         
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Items</h3>
+                <h2 id="totalItems">0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>In Stock</h3>
+                <h2 id="inStockItems">0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>Low Stock</h3>
+                <h2 id="lowStockItems">0</h2>
+            </div>
+            <div class="stat-card">
+                <h3>Out of Stock</h3>
+                <h2 id="outOfStockItems">0</h2>
+            </div>
+        </div>
+
         <div class="inventory-list">
             <div id="inventoryItems">Loading inventory...</div>
         </div>
     </div>
 
-    <script src="js/inventory.js"></script>
     <script>
+        // Inventory Management System
+        window.InventorySystem = {
+            init: function() {
+                if (!localStorage.getItem('restaurantInventory')) {
+                    const initialInventory = {
+                        items: [
+                            { id: 1, name: "Kenyan Full Breakfast", quantity: 20, category: "breakfast", price: 750 },
+                            { id: 2, name: "Nyama Choma Platter", quantity: 15, category: "nyama", price: 1200 },
+                            { id: 3, name: "Ugali with Beef", quantity: 25, category: "main", price: 450 },
+                            { id: 4, name: "Ugali with Matumbo", quantity: 18, category: "main", price: 400 },
+                            { id: 5, name: "Mukimo", quantity: 22, category: "main", price: 350 },
+                            { id: 6, name: "Rice with Ndegu", quantity: 20, category: "main", price: 380 },
+                            { id: 7, name: "Fresh Orange Juice", quantity: 30, category: "drinks", price: 200 },
+                            { id: 8, name: "Bottled Water", quantity: 50, category: "drinks", price: 80 },
+                            { id: 9, name: "Soda Selection", quantity: 40, category: "drinks", price: 120 },
+                            { id: 10, name: "Kenyan Tea", quantity: 35, category: "drinks", price: 100 },
+                            { id: 11, name: "Coffee", quantity: 25, category: "drinks", price: 150 }
+                        ],
+                        lastUpdated: new Date().toISOString()
+                    };
+                    localStorage.setItem('restaurantInventory', JSON.stringify(initialInventory));
+                }
+                return JSON.parse(localStorage.getItem('restaurantInventory'));
+            },
+
+            getAllItems: function() {
+                const data = this.init();
+                return data.items;
+            },
+
+            getInStockItems: function() {
+                const data = this.init();
+                return data.items.filter(item => item.quantity > 0);
+            },
+
+            reduceQuantity: function(itemId, quantity = 1) {
+                const data = this.init();
+                const item = data.items.find(i => i.id === itemId);
+                
+                if (item && item.quantity >= quantity) {
+                    item.quantity -= quantity;
+                    item.lastSold = new Date().toISOString();
+                    localStorage.setItem('restaurantInventory', JSON.stringify(data));
+                    return true;
+                }
+                return false;
+            },
+
+            addQuantity: function(itemId, quantity) {
+                const data = this.init();
+                const item = data.items.find(i => i.id === itemId);
+                
+                if (item) {
+                    item.quantity += quantity;
+                    item.lastRestocked = new Date().toISOString();
+                    localStorage.setItem('restaurantInventory', JSON.stringify(data));
+                    return true;
+                }
+                return false;
+            },
+
+            updateQuantity: function(itemId, newQuantity) {
+                const data = this.init();
+                const item = data.items.find(i => i.id === itemId);
+                
+                if (item) {
+                    item.quantity = newQuantity;
+                    localStorage.setItem('restaurantInventory', JSON.stringify(data));
+                    return true;
+                }
+                return false;
+            },
+
+            getStats: function() {
+                const items = this.getAllItems();
+                return {
+                    total: items.length,
+                    inStock: items.filter(item => item.quantity > 5).length,
+                    lowStock: items.filter(item => item.quantity > 0 && item.quantity <= 5).length,
+                    outOfStock: items.filter(item => item.quantity === 0).length
+                };
+            },
+
+            bulkRestock: function() {
+                const data = this.init();
+                data.items.forEach(item => {
+                    if (item.quantity < 10) {
+                        item.quantity += 20;
+                        item.lastRestocked = new Date().toISOString();
+                    }
+                });
+                localStorage.setItem('restaurantInventory', JSON.stringify(data));
+                return true;
+            }
+        };
+
         function loadInventory() {
             const items = InventorySystem.getAllItems();
+            const stats = InventorySystem.getStats();
             const container = document.getElementById('inventoryItems');
+            
+            // Update stats
+            document.getElementById('totalItems').textContent = stats.total;
+            document.getElementById('inStockItems').textContent = stats.inStock;
+            document.getElementById('lowStockItems').textContent = stats.lowStock;
+            document.getElementById('outOfStockItems').textContent = stats.outOfStock;
             
             container.innerHTML = items.map(item => {
                 const quantityClass = item.quantity === 0 ? 'out-of-stock' : 
@@ -56,36 +186,87 @@
                         </div>
                     </div>
                     <div class="quantity-controls">
-                        <input type="number" id="qty-${item.id}" class="quantity-input" value="1" min="1">
-                        <button class="quantity-btn add-btn" onclick="addStock(${item.id})">+ Add</button>
-                        <button class="quantity-btn reduce-btn" onclick="reduceStock(${item.id})">- Reduce</button>
-                        <button class="update-btn" onclick="updateStock(${item.id})">Update</button>
+                        <input type="number" id="qty-${item.id}" class="quantity-input" value="1" min="1" max="100">
+                        <button class="action-btn add-btn" onclick="addStock(${item.id})">+ Add</button>
+                        <button class="action-btn reduce-btn" onclick="reduceStock(${item.id})">- Reduce</button>
+                        <button class="action-btn update-btn" onclick="updateStock(${item.id})">Update</button>
                     </div>
                 </div>
                 `;
             }).join('');
+            
+            // Add bulk restock button if low stock items exist
+            if (stats.lowStock > 0 || stats.outOfStock > 0) {
+                container.innerHTML += `
+                    <div style="text-align: center; margin-top: 30px; padding: 20px;">
+                        <button class="action-btn restock-btn" onclick="bulkRestock()" style="padding: 15px 30px; font-size: 1.1em;">
+                            🔄 Bulk Restock All Low Items
+                        </button>
+                    </div>
+                `;
+            }
         }
 
         function addStock(itemId) {
             const input = document.getElementById(`qty-${itemId}`);
             const quantity = parseInt(input.value) || 1;
-            InventorySystem.addQuantity(itemId, quantity);
-            loadInventory();
+            if (InventorySystem.addQuantity(itemId, quantity)) {
+                showToast(`➕ Added ${quantity} to stock`, 'success');
+                loadInventory();
+            }
         }
 
         function reduceStock(itemId) {
-            const input = document.getElementById(`qty-${item.id}`);
+            const input = document.getElementById(`qty-${itemId}`);
             const quantity = parseInt(input.value) || 1;
-            InventorySystem.reduceQuantity(itemId, quantity);
-            loadInventory();
+            if (InventorySystem.reduceQuantity(itemId, quantity)) {
+                showToast(`➖ Reduced stock by ${quantity}`, 'info');
+                loadInventory();
+            } else {
+                showToast('❌ Not enough stock to reduce', 'error');
+            }
         }
 
         function updateStock(itemId) {
             const input = document.getElementById(`qty-${itemId}`);
             const newQuantity = parseInt(input.value) || 0;
-            InventorySystem.updateQuantity(itemId, newQuantity);
-            loadInventory();
+            if (InventorySystem.updateQuantity(itemId, newQuantity)) {
+                showToast(`📊 Stock updated to ${newQuantity}`, 'success');
+                loadInventory();
+            }
         }
+
+        function bulkRestock() {
+            if (confirm('Add 20 units to all items with low stock?')) {
+                if (InventorySystem.bulkRestock()) {
+                    showToast('🔄 Bulk restock completed!', 'success');
+                    loadInventory();
+                }
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                font-weight: 600;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Auto-refresh every 10 seconds
+        setInterval(loadInventory, 10000);
 
         // Load inventory when page opens
         document.addEventListener('DOMContentLoaded', loadInventory);

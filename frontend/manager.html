@@ -6,73 +6,114 @@
     <title>Manager Dashboard - Savanna Grill & Bar</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: #2c3e50; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .orders { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 30px; background: #f8f9fa; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #3498db; }
+        .stat-card.revenue { border-left-color: #27ae60; }
+        .stat-card.orders { border-left-color: #3498db; }
+        .stat-card.tables { border-left-color: #9b59b6; }
+        .stat-card.popular { border-left-color: #e74c3c; }
+        .dashboard { padding: 30px; }
+        .section { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ecf0f1; }
+        th { background: #f8f9fa; font-weight: 600; color: #2c3e50; }
         .high-value { background: #e8f5e8; }
+        .low-stock { background: #fdeaea; }
+        .action-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 5px; }
+        .primary-btn { background: #3498db; color: white; }
+        .danger-btn { background: #e74c3c; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>👨‍💼 Manager Dashboard</h1>
-            <p>Savanna Grill & Bar - Business Overview</p>
+            <p>Savanna Grill & Bar - Business Intelligence</p>
         </div>
         
         <div class="stats">
-            <div class="stat-card">
+            <div class="stat-card revenue">
                 <h3>💰 Today's Revenue</h3>
                 <h2 id="todayRevenue">Ksh 0</h2>
             </div>
-            <div class="stat-card">
+            <div class="stat-card orders">
                 <h3>📊 Total Orders</h3>
                 <h2 id="totalOrders">0</h2>
             </div>
-            <div class="stat-card">
+            <div class="stat-card tables">
                 <h3>🍽️ Active Tables</h3>
                 <h2 id="activeTables">0</h2>
             </div>
-            <div class="stat-card">
+            <div class="stat-card popular">
                 <h3>⭐ Popular Item</h3>
                 <h2 id="popularItem">-</h2>
             </div>
         </div>
 
-        <div class="orders">
-            <h2>📋 Recent Orders</h2>
-            <div id="recentOrders">Loading orders...</div>
-        </div>
+        <div class="dashboard">
+            <div class="section">
+                <h2>📋 Recent Orders</h2>
+                <div id="recentOrders">Loading orders...</div>
+            </div>
 
-        <div class="orders">
-            <h2>📈 Sales Analytics</h2>
-            <p><strong>Feature Coming Soon:</strong> Charts, reports, and detailed analytics</p>
+            <div class="section">
+                <h2>📦 Inventory Overview</h2>
+                <div id="inventoryOverview">Loading inventory...</div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Sales Analytics</h2>
+                <p><strong>Feature Coming Soon:</strong> Charts, reports, and detailed analytics</p>
+                <button class="action-btn primary-btn" onclick="generateReport()">📄 Generate Daily Report</button>
+            </div>
         </div>
     </div>
 
     <script>
         // Manager Dashboard Functions
         function loadManagerData() {
-            // Get orders from shared database
-            if (typeof SharedOrders !== 'undefined') {
-                const orders = SharedOrders.getAllOrders();
-                displayManagerData(orders);
-            } else {
-                // Fallback: Try to access localStorage directly
-                try {
-                    const sharedData = JSON.parse(localStorage.getItem('sharedOrders') || '{"orders":[]}');
-                    displayManagerData(sharedData.orders);
-                } catch (error) {
-                    document.getElementById('recentOrders').innerHTML = 'Error loading orders';
+            // Get data from shared databases
+            const orders = getSharedOrders();
+            const inventory = getInventoryData();
+            
+            displayManagerData(orders, inventory);
+        }
+
+        function getSharedOrders() {
+            // Access shared orders database
+            try {
+                if (typeof SharedOrders !== 'undefined') {
+                    return SharedOrders.getAllOrders();
                 }
+                // Fallback to localStorage
+                const sharedData = JSON.parse(localStorage.getItem('sharedOrders') || '{"orders":[]}');
+                return sharedData.orders;
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                return [];
             }
         }
 
-        function displayManagerData(orders) {
+        function getInventoryData() {
+            // Access inventory database
+            try {
+                if (typeof InventorySystem !== 'undefined') {
+                    return InventorySystem.getAllItems();
+                }
+                // Fallback to localStorage
+                const inventoryData = JSON.parse(localStorage.getItem('restaurantInventory') || '{"items":[]}');
+                return inventoryData.items;
+            } catch (error) {
+                console.error('Error loading inventory:', error);
+                return [];
+            }
+        }
+
+        function displayManagerData(orders, inventory) {
             // Calculate stats
             const today = new Date().toDateString();
             const todayOrders = orders.filter(order => 
@@ -89,7 +130,7 @@
                 itemCount[item.name] = (itemCount[item.name] || 0) + item.quantity;
             });
             const popularItem = Object.keys(itemCount).reduce((a, b) => 
-                itemCount[a] > itemCount[b] ? a : b, 'None'
+                itemCount[a] > itemCount[b] ? a : 'None', 'None'
             );
 
             // Update display
@@ -125,13 +166,86 @@
                 </table>
                 ${orders.length === 0 ? '<p>No orders yet</p>' : ''}
             `;
+
+            // Display inventory overview
+            const lowStockItems = inventory.filter(item => item.quantity <= 5);
+            document.getElementById('inventoryOverview').innerHTML = `
+                <p><strong>Total Items:</strong> ${inventory.length} | 
+                <strong>Low Stock:</strong> ${lowStockItems.length} | 
+                <strong>Out of Stock:</strong> ${inventory.filter(item => item.quantity === 0).length}</p>
+                
+                ${lowStockItems.length > 0 ? `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Current Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${lowStockItems.map(item => `
+                                <tr class="low-stock">
+                                    <td>${item.name}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>${item.quantity === 0 ? 'OUT OF STOCK' : 'LOW STOCK'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : '<p>All items have sufficient stock</p>'}
+            `;
         }
 
-        // Load data when page opens
+        function generateReport() {
+            const orders = getSharedOrders();
+            const today = new Date().toDateString();
+            const todayOrders = orders.filter(order => 
+                new Date(order.createdAt).toDateString() === today
+            );
+            
+            const revenue = todayOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+            
+            alert(`📊 DAILY REPORT\n
+📈 Today's Revenue: Ksh ${revenue.toLocaleString()}
+📋 Total Orders: ${todayOrders.length}
+🍽️ Active Tables: ${[...new Set(todayOrders.map(o => o.tableNumber))].length}
+⏰ Generated: ${new Date().toLocaleString()}
+            `);
+        }
+
+        // Fallback SharedOrders if not available
+        if (typeof SharedOrders === 'undefined') {
+            window.SharedOrders = {
+                getAllOrders: function() {
+                    try {
+                        const data = JSON.parse(localStorage.getItem('sharedOrders') || '{"orders":[]}');
+                        return data.orders;
+                    } catch (error) {
+                        return [];
+                    }
+                }
+            };
+        }
+
+        // Fallback InventorySystem if not available
+        if (typeof InventorySystem === 'undefined') {
+            window.InventorySystem = {
+                getAllItems: function() {
+                    try {
+                        const data = JSON.parse(localStorage.getItem('restaurantInventory') || '{"items":[]}');
+                        return data.items;
+                    } catch (error) {
+                        return [];
+                    }
+                }
+            };
+        }
+
+        // Load data when page opens and refresh every 30 seconds
         document.addEventListener('DOMContentLoaded', function() {
             loadManagerData();
-            // Refresh every 10 seconds
-            setInterval(loadManagerData, 10000);
+            setInterval(loadManagerData, 30000);
         });
     </script>
 </body>

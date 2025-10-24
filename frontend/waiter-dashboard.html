@@ -3,130 +3,1053 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Waiter Dashboard - Savanna Grill</title>
+    <title>Waiter Dashboard - Savanna Grill & Bar</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: #2c3e50; color: white; padding: 30px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-        .orders-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .order-card { background: white; padding: 20px; border-radius: 10px; border-left: 5px solid #e74c3c; }
-        .order-card.pending { border-left-color: #e74c3c; }
-        .order-card.preparing { border-left-color: #f39c12; }
-        .order-card.ready { border-left-color: #27ae60; }
-        .order-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .order-items { margin: 10px 0; }
-        .order-item { display: flex; justify-content: space-between; padding: 5px 0; }
-        .order-actions { display: flex; gap: 10px; margin-top: 15px; }
-        .status-btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; }
-        .preparing-btn { background: #f39c12; color: white; }
-        .ready-btn { background: #27ae60; color: white; }
-        .complete-btn { background: #3498db; color: white; }
-        .no-orders { text-align: center; padding: 40px; color: #7f8c8d; grid-column: 1 / -1; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #2c5530, #4a7c59);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><polygon points="50,0 100,50 50,100 0,50" fill="white"/></svg>');
+            background-size: 80px 80px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard-header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .dashboard-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 24px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #2c5530;
+            color: white;
+            border-color: #2c5530;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 85, 48, 0.3);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .refresh-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .test-btn {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .test-btn:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3);
+        }
+
+        .clear-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .orders-container {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-left: 6px solid #e74c3c;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c, #f39c12);
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .order-card.pending {
+            border-left-color: #e74c3c;
+            background: linear-gradient(135deg, #fffaf0, #fff5e6);
+        }
+
+        .order-card.preparing {
+            border-left-color: #f39c12;
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+        }
+
+        .order-card.ready {
+            border-left-color: #27ae60;
+            background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+        }
+
+        .order-card.completed {
+            border-left-color: #95a5a6;
+            background: linear-gradient(135deg, #f8f9fa, #f0f0f0);
+            opacity: 0.8;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .order-info {
+            flex: 1;
+        }
+
+        .order-id {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c5530;
+            margin-bottom: 5px;
+        }
+
+        .order-customer {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .order-table {
+            font-size: 0.95em;
+            color: #7f8c8d;
+            background: #ecf0f1;
+            padding: 4px 12px;
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .order-meta {
+            text-align: right;
+        }
+
+        .order-time {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .order-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .status-preparing {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .status-ready {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+
+        .order-details {
+            margin: 20px 0;
+        }
+
+        .order-items {
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .item-quantity {
+            background: #2c5530;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .item-price {
+            font-weight: bold;
+            color: #2c5530;
+        }
+
+        .order-total {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .total-amount {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c5530;
+        }
+
+        .order-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .preparing-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .ready-btn {
+            background: linear-gradient(135deg, #27ae60, #219a52);
+            color: white;
+        }
+
+        .complete-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .remove-btn {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .no-orders {
+            text-align: center;
+            padding: 80px 20px;
+            color: #7f8c8d;
+            grid-column: 1 / -1;
+        }
+
+        .no-orders-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .connection-status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 0 30px 20px 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .connection-status.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .new-order-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-buttons,
+            .control-buttons {
+                justify-content: center;
+            }
+            
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .order-actions {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>👨‍🍳 WAITER DASHBOARD</h1>
-            <p>Savanna Grill & Bar - Live Order Management</p>
-            <div style="margin-top: 15px;">
-                <span style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 20px;">
-                    📱 Connected to Customer Orders
-                </span>
+    <div class="dashboard-container">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <h1>👨‍🍳 Waiter Dashboard</h1>
+            <p>Savanna Grill & Bar • Live Order Management System</p>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalOrders">0</span>
+                    <span class="stat-label">Total Orders</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="pendingOrders">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="preparingOrders">0</span>
+                    <span class="stat-label">Preparing</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="readyOrders">0</span>
+                    <span class="stat-label">Ready to Serve</span>
+                </div>
             </div>
         </div>
-        
-        <div class="orders-container" id="ordersContainer">
-            <div class="no-orders">Loading orders...</div>
+
+        <!-- Connection Status -->
+        <div class="connection-status" id="connectionStatus">
+            <span class="pulse">🔴</span>
+            <span>Connecting to order database...</span>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="dashboard-controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">📋 All Orders</button>
+                <button class="filter-btn" data-filter="pending">⏳ Pending</button>
+                <button class="filter-btn" data-filter="preparing">👨‍🍳 Preparing</button>
+                <button class="filter-btn" data-filter="ready">✅ Ready</button>
+                <button class="filter-btn" data-filter="completed">🎉 Completed</button>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="control-btn refresh-btn" onclick="loadOrders()">
+                    🔄 Refresh
+                </button>
+                <button class="control-btn test-btn" onclick="addTestOrder()">
+                    ➕ Test Order
+                </button>
+                <button class="control-btn clear-btn" onclick="clearCompletedOrders()">
+                    🗑️ Clear Completed
+                </button>
+            </div>
+        </div>
+
+        <!-- Orders Container -->
+        <div class="orders-container">
+            <div class="orders-grid" id="ordersList">
+                <div class="no-orders">
+                    <div class="no-orders-icon">📝</div>
+                    <h3>No Orders Yet</h3>
+                    <p>Customer orders will appear here automatically</p>
+                    <button class="control-btn test-btn" onclick="addTestOrder()" style="margin-top: 20px;">
+                        ➕ Add Test Order
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Shared Orders Database
+        // Enhanced Shared Orders Database
         window.SharedOrders = {
             init: function() {
                 if (!localStorage.getItem('sharedOrders')) {
-                    const initialData = { orders: [], nextOrderId: 1 };
+                    const initialData = {
+                        orders: [],
+                        nextOrderId: 1,
+                        settings: {
+                            autoRefresh: true,
+                            soundEnabled: true,
+                            notifications: true
+                        }
+                    };
                     localStorage.setItem('sharedOrders', JSON.stringify(initialData));
                 }
                 return JSON.parse(localStorage.getItem('sharedOrders'));
             },
+
+            saveOrder: function(orderData) {
+                const data = this.init();
+                
+                const order = {
+                    id: 'ORD' + data.nextOrderId.toString().padStart(6, '0'),
+                    tableNumber: orderData.tableNumber,
+                    items: orderData.items,
+                    totalAmount: orderData.totalAmount,
+                    status: 'pending',
+                    customerName: orderData.customerName || `Table ${orderData.tableNumber}`,
+                    createdAt: new Date().toISOString(),
+                    createdAtFormatted: new Date().toLocaleTimeString(),
+                    isNew: true
+                };
+
+                data.orders.unshift(order);
+                data.nextOrderId++;
+                
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                
+                // Play notification sound for new orders
+                this.playNotificationSound();
+                
+                return order;
+            },
+
             getAllOrders: function() {
                 const data = this.init();
                 return data.orders;
             },
+
             updateOrderStatus: function(orderId, newStatus) {
                 const data = this.init();
                 const order = data.orders.find(o => o.id === orderId);
+                
                 if (order) {
                     order.status = newStatus;
                     order.updatedAt = new Date().toISOString();
+                    order.updatedAtFormatted = new Date().toLocaleTimeString();
                     localStorage.setItem('sharedOrders', JSON.stringify(data));
+                    
+                    // Play sound for status updates
+                    if (newStatus === 'ready') {
+                        this.playReadySound();
+                    }
+                    
                     return true;
                 }
                 return false;
+            },
+
+            completeOrder: function(orderId) {
+                const data = this.init();
+                data.orders = data.orders.filter(order => order.id !== orderId);
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                return true;
+            },
+
+            clearCompletedOrders: function() {
+                const data = this.init();
+                data.orders = data.orders.filter(order => order.status !== 'completed');
+                localStorage.setItem('sharedOrders', JSON.stringify(data));
+                return true;
+            },
+
+            getOrdersByStatus: function(status) {
+                const data = this.init();
+                if (status === 'all') return data.orders;
+                return data.orders.filter(order => order.status === status);
+            },
+
+            getOrderStats: function() {
+                const orders = this.getAllOrders();
+                return {
+                    total: orders.length,
+                    pending: orders.filter(o => o.status === 'pending').length,
+                    preparing: orders.filter(o => o.status === 'preparing').length,
+                    ready: orders.filter(o => o.status === 'ready').length,
+                    completed: orders.filter(o => o.status === 'completed').length
+                };
+            },
+
+            playNotificationSound: function() {
+                // Simple beep sound for new orders
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    gainNode.gain.value = 0.1;
+                    
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            },
+
+            playReadySound: function() {
+                // Different sound for ready orders
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 600;
+                    gainNode.gain.value = 0.1;
+                    
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1);
+                    oscillator.stop(audioContext.currentTime + 1);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
             }
         };
 
+        // Dashboard State Management
+        let currentFilter = 'all';
+        let lastOrderCount = 0;
+
+        // Main Functions
         function loadOrders() {
-            const orders = SharedOrders.getAllOrders();
-            const container = document.getElementById('ordersContainer');
+            const ordersList = document.getElementById('ordersList');
+            const connectionStatus = document.getElementById('connectionStatus');
             
-            if (orders.length === 0) {
-                container.innerHTML = '<div class="no-orders">📝 No orders yet<br><small>Customer orders will appear here automatically</small></div>';
+            // Update connection status
+            if (typeof SharedOrders !== 'undefined') {
+                connectionStatus.innerHTML = '<span class="pulse">🟢</span> <strong>LIVE CONNECTED</strong> - Real-time orders from customers • Auto-refreshes every 5 seconds';
+                connectionStatus.className = 'connection-status';
+            } else {
+                connectionStatus.innerHTML = '<span>🔴</span> <strong>DATABASE ERROR</strong> - Please refresh the page';
+                connectionStatus.className = 'connection-status error';
                 return;
             }
-
-            container.innerHTML = orders.map(order => `
-                <div class="order-card ${order.status || 'pending'}">
+            
+            const orders = SharedOrders.getOrdersByStatus(currentFilter);
+            const stats = SharedOrders.getOrderStats();
+            
+            // Update statistics
+            updateStatistics(stats);
+            
+            // Check for new orders
+            if (orders.length > lastOrderCount && lastOrderCount > 0) {
+                showNewOrderNotification(orders.length - lastOrderCount);
+            }
+            lastOrderCount = orders.length;
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="no-orders">
+                        <div class="no-orders-icon">${getNoOrdersIcon()}</div>
+                        <h3>No ${currentFilter === 'all' ? '' : currentFilter} Orders</h3>
+                        <p>${getNoOrdersMessage()}</p>
+                        ${currentFilter === 'all' ? `
+                            <button class="control-btn test-btn" onclick="addTestOrder()" style="margin-top: 20px;">
+                                ➕ Add Test Order
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                return;
+            }
+            
+            ordersList.innerHTML = orders.map(order => `
+                <div class="order-card ${order.status}" id="order-${order.id}">
+                    ${order.isNew ? '<div class="new-order-badge">NEW</div>' : ''}
+                    
                     <div class="order-header">
-                        <div>
-                            <strong>${order.id}</strong>
-                            <div>Table ${order.tableNumber}</div>
-                            <div>${order.customerName}</div>
+                        <div class="order-info">
+                            <div class="order-id">${order.id}</div>
+                            <div class="order-customer">${order.customerName}</div>
+                            <div class="order-table">Table ${order.tableNumber}</div>
                         </div>
-                        <div>
-                            <div>${order.createdAtFormatted || 'Just now'}</div>
-                            <div>Status: <strong>${order.status || 'pending'}</strong></div>
-                        </div>
-                    </div>
-                    <div class="order-items">
-                        ${order.items.map(item => `
-                            <div class="order-item">
-                                <span>${item.name} x${item.quantity}</span>
-                                <span>Ksh ${(item.price * item.quantity).toLocaleString()}</span>
+                        <div class="order-meta">
+                            <div class="order-time">${order.createdAtFormatted}</div>
+                            <div class="order-status status-${order.status}">
+                                ${getStatusText(order.status)}
                             </div>
-                        `).join('')}
+                        </div>
                     </div>
-                    <div class="order-total">
-                        <strong>Total: Ksh ${order.totalAmount.toLocaleString()}</strong>
+                    
+                    <div class="order-details">
+                        <div class="order-items">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <div class="item-info">
+                                        <div class="item-quantity">${item.quantity}</div>
+                                        <div class="item-name">${item.name}</div>
+                                    </div>
+                                    <div class="item-price">Ksh ${(item.price * item.quantity).toLocaleString()}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="order-total">
+                            <div class="total-amount">Total: Ksh ${order.totalAmount.toLocaleString()}</div>
+                        </div>
                     </div>
+                    
                     <div class="order-actions">
-                        <button class="status-btn preparing-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
-                            👨‍🍳 Preparing
-                        </button>
-                        <button class="status-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
-                            ✅ Ready
-                        </button>
-                        <button class="status-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
-                            🎉 Served
-                        </button>
+                        ${getActionButtons(order)}
                     </div>
                 </div>
             `).join('');
+            
+            // Remove new order badges after display
+            setTimeout(() => {
+                orders.forEach(order => {
+                    if (order.isNew) {
+                        const data = SharedOrders.init();
+                        const updatedOrder = data.orders.find(o => o.id === order.id);
+                        if (updatedOrder) {
+                            updatedOrder.isNew = false;
+                        }
+                        localStorage.setItem('sharedOrders', JSON.stringify(data));
+                    }
+                });
+            }, 3000);
         }
 
-        function updateOrderStatus(orderId, newStatus) {
-            if (SharedOrders.updateOrderStatus(orderId, newStatus)) {
-                loadOrders();
+        function getActionButtons(order) {
+            switch (order.status) {
+                case 'pending':
+                    return `
+                        <button class="action-btn preparing-btn" onclick="updateOrderStatus('${order.id}', 'preparing')">
+                            👨‍🍳 Start Preparing
+                        </button>
+                        <button class="action-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
+                            ⏩ Mark Ready
+                        </button>
+                    `;
+                case 'preparing':
+                    return `
+                        <button class="action-btn ready-btn" onclick="updateOrderStatus('${order.id}', 'ready')">
+                            ✅ Mark Ready
+                        </button>
+                        <button class="action-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
+                            🎉 Serve Now
+                        </button>
+                    `;
+                case 'ready':
+                    return `
+                        <button class="action-btn complete-btn" onclick="updateOrderStatus('${order.id}', 'completed')">
+                            🎉 Mark Served
+                        </button>
+                        <button class="action-btn remove-btn" onclick="deleteOrder('${order.id}')">
+                            🗑️ Remove
+                        </button>
+                    `;
+                case 'completed':
+                    return `
+                        <button class="action-btn remove-btn" onclick="deleteOrder('${order.id}')" style="grid-column: 1 / -1;">
+                            🗑️ Remove Order
+                        </button>
+                    `;
+                default:
+                    return '';
             }
         }
 
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '⏳ Pending',
+                'preparing': '👨‍🍳 Preparing',
+                'ready': '✅ Ready',
+                'completed': '🎉 Completed'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getNoOrdersIcon() {
+            const icons = {
+                'all': '📝',
+                'pending': '⏳',
+                'preparing': '👨‍🍳',
+                'ready': '✅',
+                'completed': '🎉'
+            };
+            return icons[currentFilter] || '📝';
+        }
+
+        function getNoOrdersMessage() {
+            const messages = {
+                'all': 'Customer orders will appear here automatically',
+                'pending': 'No pending orders at the moment',
+                'preparing': 'No orders being prepared',
+                'ready': 'No orders ready for serving',
+                'completed': 'No completed orders to show'
+            };
+            return messages[currentFilter] || 'No orders found';
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            if (typeof SharedOrders !== 'undefined') {
+                const success = SharedOrders.updateOrderStatus(orderId, newStatus);
+                if (success) {
+                    const statusMessages = {
+                        'preparing': '👨‍🍳 Order is now being prepared',
+                        'ready': '✅ Order is ready for serving!',
+                        'completed': '🎉 Order has been served successfully'
+                    };
+                    
+                    if (statusMessages[newStatus]) {
+                        showToast(statusMessages[newStatus], 'success');
+                    }
+                    
+                    loadOrders();
+                }
+            } else {
+                showToast('Error: Cannot update order status', 'error');
+            }
+        }
+
+        function deleteOrder(orderId) {
+            if (confirm('Are you sure you want to remove this order from the dashboard?')) {
+                if (typeof SharedOrders !== 'undefined') {
+                    SharedOrders.completeOrder(orderId);
+                    showToast('Order removed from dashboard', 'success');
+                    loadOrders();
+                }
+            }
+        }
+
+        function clearCompletedOrders() {
+            const completedOrders = SharedOrders.getOrdersByStatus('completed');
+            if (completedOrders.length === 0) {
+                showToast('No completed orders to clear', 'info');
+                return;
+            }
+            
+            if (confirm(`Clear all ${completedOrders.length} completed orders? This cannot be undone.`)) {
+                if (typeof SharedOrders !== 'undefined') {
+                    SharedOrders.clearCompletedOrders();
+                    showToast(`Cleared ${completedOrders.length} completed orders`, 'success');
+                    loadOrders();
+                }
+            }
+        }
+
+        function updateStatistics(stats) {
+            document.getElementById('totalOrders').textContent = stats.total;
+            document.getElementById('pendingOrders').textContent = stats.pending;
+            document.getElementById('preparingOrders').textContent = stats.preparing;
+            document.getElementById('readyOrders').textContent = stats.ready;
+        }
+
+        function addTestOrder() {
+            if (typeof SharedOrders !== 'undefined') {
+                const menuItems = [
+                    { name: 'Tea', price: 50 },
+                    { name: '2 Chapati + Beans', price: 120 },
+                    { name: 'Nyama Choma (1/2)', price: 800 },
+                    { name: 'Ugali + Sukuma', price: 180 },
+                    { name: 'Fresh Juice', price: 150 }
+                ];
+                
+                const randomItems = [];
+                const itemCount = Math.floor(Math.random() * 3) + 1;
+                
+                for (let i = 0; i < itemCount; i++) {
+                    const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
+                    randomItems.push({
+                        ...randomItem,
+                        quantity: Math.floor(Math.random() * 2) + 1
+                    });
+                }
+                
+                const totalAmount = randomItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                const testOrder = {
+                    tableNumber: Math.floor(Math.random() * 12) + 1,
+                    items: randomItems,
+                    totalAmount: totalAmount,
+                    customerName: 'Test Customer'
+                };
+                
+                SharedOrders.saveOrder(testOrder);
+                loadOrders();
+                showToast(`✅ Test order added! Table ${testOrder.tableNumber} - Ksh ${totalAmount.toLocaleString()}`, 'success');
+            } else {
+                showToast('Error: Shared orders database not available', 'error');
+            }
+        }
+
+        function showNewOrderNotification(count) {
+            showToast(`🆕 ${count} new order${count > 1 ? 's' : ''} received!`, 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            // Remove existing toast
+            const existingToast = document.getElementById('dashboardToast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            const toast = document.createElement('div');
+            toast.id = 'dashboardToast';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Add CSS for animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Event Listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                loadOrders();
+            });
+        });
+
         // Auto-refresh every 5 seconds
-        document.addEventListener('DOMContentLoaded', function() {
+        setInterval(() => {
             loadOrders();
-            setInterval(loadOrders, 5000);
+        }, 5000);
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+            console.log('🚀 Waiter Dashboard initialized with enhanced features');
         });
     </script>
 </body>
