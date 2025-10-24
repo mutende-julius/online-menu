@@ -14,14 +14,33 @@ window.DigitalMenu = window.DigitalMenu || class {
     }
 
     async init() {
-        console.log('Initializing Digital Menu...');
+        console.log('Initializing Digital Menu with Inventory...');
         try {
-            await this.loadMenuItems();
+            await this.loadMenuWithInventory();
             this.setupEventListeners();
             this.renderMenu();
-            console.log('Digital Menu initialized successfully');
+            console.log('Digital Menu with Inventory initialized successfully');
         } catch (error) {
             console.error('Error initializing menu:', error);
+        }
+    }
+
+    async loadMenuWithInventory() {
+        try {
+            await this.loadMenuItems();
+            
+            // Filter menu based on inventory
+            if (typeof InventorySystem !== 'undefined') {
+                const inStockItems = InventorySystem.getInStockItems();
+                this.menuItems = this.menuItems.filter(menuItem => 
+                    inStockItems.some(stockItem => stockItem.id === menuItem.id)
+                );
+                console.log('Menu loaded with inventory:', this.menuItems.length, 'items in stock');
+            } else {
+                console.log('InventorySystem not available, showing all items');
+            }
+        } catch (error) {
+            console.error('Error loading menu with inventory:', error);
         }
     }
 
@@ -300,7 +319,15 @@ window.DigitalMenu = window.DigitalMenu || class {
 
         console.log('Processing payment success:', orderData);
 
-        // ✅ ADDED: Save to shared orders for waiter dashboard
+        // ✅ Reduce inventory for each sold item
+        if (typeof InventorySystem !== 'undefined') {
+            this.cart.forEach(item => {
+                InventorySystem.reduceQuantity(item.id, item.quantity);
+            });
+            console.log('📦 Inventory updated for sold items');
+        }
+
+        // ✅ Save to shared orders for waiter dashboard
         if (typeof SharedOrders !== 'undefined') {
             SharedOrders.saveOrder({
                 tableNumber: orderData.tableNumber,
@@ -348,7 +375,14 @@ window.DigitalMenu = window.DigitalMenu || class {
             orderId: 'ORD' + Date.now().toString().slice(-6)
         };
 
-        // ✅ ADDED: Save to shared orders for waiter dashboard
+        // ✅ Reduce inventory for each sold item
+        if (typeof InventorySystem !== 'undefined') {
+            this.cart.forEach(item => {
+                InventorySystem.reduceQuantity(item.id, item.quantity);
+            });
+        }
+
+        // ✅ Save to shared orders for waiter dashboard
         if (typeof SharedOrders !== 'undefined') {
             SharedOrders.saveOrder({
                 tableNumber: orderData.tableNumber,

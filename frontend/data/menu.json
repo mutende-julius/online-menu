@@ -44,6 +44,14 @@
     },
     {
       "id": 6,
+      "name": "Rice with Ndegu",
+      "description": "White rice with pigeon peas in coconut sauce",
+      "price": 380,
+      "category": "main",
+      "image": "rice-ndegu.jpg"
+    },
+    {
+      "id": 7,
       "name": "Fresh Orange Juice",
       "description": "Freshly squeezed seasonal orange juice",
       "price": 200,
@@ -51,7 +59,7 @@
       "image": "juice.jpg"
     },
     {
-      "id": 7,
+      "id": 8,
       "name": "Bottled Water",
       "description": "Pure drinking water 500ml",
       "price": 80,
@@ -59,7 +67,7 @@
       "image": "water.jpg"
     },
     {
-      "id": 8,
+      "id": 9,
       "name": "Soda Selection",
       "description": "Coke, Fanta, Sprite (300ml)",
       "price": 120,
@@ -67,7 +75,7 @@
       "image": "soda.jpg"
     },
     {
-      "id": 9,
+      "id": 10,
       "name": "Kenyan Tea",
       "description": "Traditional tea with milk",
       "price": 100,
@@ -75,12 +83,12 @@
       "image": "tea.jpg"
     },
     {
-      "id": 10,
-      "name": "Rice with Ndegu",
-      "description": "White rice with pigeon peas in coconut sauce",
-      "price": 380,
-      "category": "main",
-      "image": "rice-ndegu.jpg"
+      "id": 11,
+      "name": "Coffee",
+      "description": "Fresh brewed coffee",
+      "price": 150,
+      "category": "drinks",
+      "image": "coffee.jpg"
     }
   ]
 }
