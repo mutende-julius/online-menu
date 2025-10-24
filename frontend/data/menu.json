@@ -2,167 +2,85 @@
   "items": [
     {
       "id": 1,
-      "name": "Chafua Special",
-      "description": "2 Chapati + Beans/Cowpeas/Ndegu",
-      "price": 65,
+      "name": "Kenyan Full Breakfast",
+      "description": "Eggs, sausage, bacon, toast, coffee & juice",
+      "price": 750,
       "category": "breakfast",
-      "image": "chafua.jpg",
-      "popular": true,
-      "prepTime": "5-10 mins",
-      "rating": 4.8
+      "image": "breakfast.jpg",
+      "popular": true
     },
     {
       "id": 2,
-      "name": "2 Chapati + Beans",
-      "description": "2 soft chapatis with your choice of beans",
-      "price": 80,
-      "category": "breakfast",
-      "image": "chapati-beans.jpg",
-      "prepTime": "5-10 mins",
-      "rating": 4.6
+      "name": "Nyama Choma Platter",
+      "description": "Grilled meat served with ugali and kachumbari",
+      "price": 1200,
+      "category": "nyama",
+      "image": "nyama-choma.jpg",
+      "popular": true
     },
     {
       "id": 3,
-      "name": "2 Chapati + Cowpeas",
-      "description": "2 soft chapatis with delicious cowpeas",
-      "price": 80,
-      "category": "breakfast",
-      "image": "chapati-cowpeas.jpg",
-      "prepTime": "5-10 mins",
-      "rating": 4.5
+      "name": "Ugali with Beef",
+      "description": "Traditional cornmeal with tender beef stew",
+      "price": 450,
+      "category": "main",
+      "image": "ugali-beef.jpg"
     },
     {
       "id": 4,
-      "name": "2 Chapati + Ndegu",
-      "description": "2 soft chapatis with green peas stew",
-      "price": 80,
-      "category": "breakfast",
-      "image": "chapati-ndegu.jpg",
-      "prepTime": "5-10 mins",
-      "rating": 4.7
+      "name": "Ugali with Matumbo",
+      "description": "Cornmeal with flavorful tripe stew",
+      "price": 400,
+      "category": "main",
+      "image": "ugali-matumbo.jpg"
     },
     {
       "id": 5,
-      "name": "Single Chapati",
-      "description": "One soft, freshly made chapati",
-      "price": 25,
-      "category": "breakfast",
-      "image": "chapati.jpg",
-      "prepTime": "2-5 mins",
-      "rating": 4.9
+      "name": "Mukimo",
+      "description": "Mashed potatoes with greens and corn",
+      "price": 350,
+      "category": "main",
+      "image": "mukimo.jpg"
     },
     {
       "id": 6,
-      "name": "Tea",
-      "description": "Hot Kenyan tea with milk",
-      "price": 20,
+      "name": "Fresh Orange Juice",
+      "description": "Freshly squeezed seasonal orange juice",
+      "price": 200,
       "category": "drinks",
-      "image": "tea.jpg",
-      "prepTime": "3 mins",
-      "rating": 4.8
+      "image": "juice.jpg"
     },
     {
       "id": 7,
-      "name": "Rice + Beans",
-      "description": "Steamed rice with beans",
+      "name": "Bottled Water",
+      "description": "Pure drinking water 500ml",
       "price": 80,
-      "category": "lunch",
-      "image": "rice-beans.jpg",
-      "popular": true,
-      "prepTime": "10-15 mins",
-      "rating": 4.6
+      "category": "drinks",
+      "image": "water.jpg"
     },
     {
       "id": 8,
-      "name": "Rice + Cowpeas",
-      "description": "Steamed rice with cowpeas",
-      "price": 80,
-      "category": "lunch",
-      "image": "rice-cowpeas.jpg",
-      "prepTime": "10-15 mins",
-      "rating": 4.5
+      "name": "Soda Selection",
+      "description": "Coke, Fanta, Sprite (300ml)",
+      "price": 120,
+      "category": "drinks",
+      "image": "soda.jpg"
     },
     {
       "id": 9,
-      "name": "Rice + Ndegu",
-      "description": "Steamed rice with green peas stew",
-      "price": 80,
-      "category": "lunch",
-      "image": "rice-ndegu.jpg",
-      "prepTime": "10-15 mins",
-      "rating": 4.7
+      "name": "Kenyan Tea",
+      "description": "Traditional tea with milk",
+      "price": 100,
+      "category": "drinks",
+      "image": "tea.jpg"
     },
     {
       "id": 10,
-      "name": "Pilau",
-      "description": "Spiced rice with meat and vegetables",
-      "price": 80,
-      "category": "lunch",
-      "image": "pilau.jpg",
-      "popular": true,
-      "prepTime": "15-20 mins",
-      "rating": 4.8
-    },
-    {
-      "id": 11,
-      "name": "Ugali + Beef",
-      "description": "Ugali with beef stew",
-      "price": 100,
-      "category": "lunch",
-      "image": "ugali-beef.jpg",
-      "popular": true,
-      "prepTime": "15-20 mins",
-      "rating": 4.9
-    },
-    {
-      "id": 12,
-      "name": "Ugali + Matumbo",
-      "description": "Ugali with tripe stew",
-      "price": 80,
-      "category": "lunch",
-      "image": "ugali-matumbo.jpg",
-      "prepTime": "15-20 mins",
-      "rating": 4.7
-    },
-    {
-      "id": 13,
-      "name": "Kitheri",
-      "description": "Mixed rice and beans with vegetables",
-      "price": 60,
-      "category": "lunch",
-      "image": "kitheri.jpg",
-      "prepTime": "10-15 mins",
-      "rating": 4.6
-    },
-    {
-      "id": 14,
-      "name": "Mukimo",
-      "description": "Mashed potatoes, peas, corn, and pumpkin leaves",
-      "price": 80,
-      "category": "lunch",
-      "image": "mukimo.jpg",
-      "prepTime": "15-20 mins",
-      "rating": 4.7
-    },
-    {
-      "id": 15,
-      "name": "Soda",
-      "description": "Coca Cola, Fanta, or Sprite",
-      "price": 50,
-      "category": "drinks",
-      "image": "soda.jpg",
-      "prepTime": "1 min",
-      "rating": 4.9
-    },
-    {
-      "id": 16,
-      "name": "Bottled Water",
-      "description": "500ml bottled water",
-      "price": 30,
-      "category": "drinks",
-      "image": "water.jpg",
-      "prepTime": "1 min",
-      "rating": 5.0
+      "name": "Rice with Ndegu",
+      "description": "White rice with pigeon peas in coconut sauce",
+      "price": 380,
+      "category": "main",
+      "image": "rice-ndegu.jpg"
     }
   ]
 }
